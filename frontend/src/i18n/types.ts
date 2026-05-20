@@ -32,6 +32,8 @@ export interface Dict {
   btn_stop: string;
   btn_autocycle: string;
   btn_fill: string;
+  btn_cycle_on: string;
+  btn_cycle_off: string;
   btn_reset_camera: string;
   btn_front: string;
   btn_top: string;

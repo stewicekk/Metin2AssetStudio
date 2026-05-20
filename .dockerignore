@@ -1,0 +1,12 @@
+node_modules
+npm-debug.log
+.git
+.gitignore
+*.md
+.vscode
+.agents
+*.ps1
+dist
+.cache
+logs
+projects

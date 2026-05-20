@@ -20,7 +20,7 @@ export function LibraryPanel() {
 
   return (
     <div className="presets-panel">
-      <div className="hint" style={{ marginBottom: 5 }}>{t('lib_hint')}</div>
+      <div className="lib-hint">{t('lib_hint')}</div>
       <div className="preset-grid">
         {LIBRARY_PACKS.map((pack, idx) => (
           <button key={idx} className="pbtn"

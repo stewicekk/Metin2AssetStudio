@@ -346,22 +346,22 @@ function CurveEditor({ type, label, emitter, updateEmitter }: {
 
   return (
     <div className="curve-editor">
-      <div className="curve-tabs" style={{ display: 'flex', gap: 4, marginBottom: 4 }}>
-        <span style={{ fontSize: 10, color: 'var(--text2)', fontWeight: 600 }}>{label}</span>
+      <div className="curve-tabs">
+        <span className="curve-lbl">{label}</span>
       </div>
-      <div className="curve-canvas-container" style={{ border: '1px solid var(--border)', borderRadius: 3, overflow: 'hidden', marginBottom: 4 }}>
-        <canvas ref={canvasRef} className="curve-canvas" width={260} height={60} style={{ display: 'block', width: '100%', height: 60, background: 'var(--bg0)' }} />
+      <div className="curve-canvas-container">
+        <canvas ref={canvasRef} className="curve-canvas" width={260} height={60} />
       </div>
-      <div className="curve-points" style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 4 }}>
+      <div className="curve-points">
         {curve.map((pt, idx) => (
-          <div key={idx} style={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+          <div key={idx} className="curve-point-row">
             <input type="number" value={pt.t} step={0.01} min={0} max={1} onChange={(e) => handlePointChange(idx, 't', e.target.value)} className="n40" />
             <input type="number" value={pt.v} step={0.01} onChange={(e) => handlePointChange(idx, 'v', e.target.value)} className="n40" />
-            <button className="btn sm" onClick={() => handleRemovePoint(idx)} disabled={curve.length <= 2} style={{ padding: '0 4px', fontSize: 10 }}>✕</button>
+            <button className="btn sm curve-btn-rm" onClick={() => handleRemovePoint(idx)} disabled={curve.length <= 2}>✕</button>
           </div>
         ))}
       </div>
-      <div className="curve-actions" style={{ display: 'flex', gap: 2 }}>
+      <div className="curve-actions">
         <button className="btn sm" onClick={handleAddPoint}>{t('pp_curve_add')}</button>
         <button className="btn sm" onClick={handleReset}>{t('pp_curve_reset')}</button>
         <button className="btn sm" onClick={handleFlat}>{t('pp_curve_flat')}</button>
@@ -426,25 +426,24 @@ function ColorKeyEditor({ emitter, updateEmitter }: {
   return (
     <div className="color-key-editor">
       <div className="gradient-preview" style={{
-        height: 20, borderRadius: 3, marginBottom: 4,
         background: `linear-gradient(to right, ${colorKeys.map(k => `rgba(${Math.round(k.r*255)},${Math.round(k.g*255)},${Math.round(k.b*255)},${k.a}) ${k.t*100}%`).join(', ')})`
       }} />
-      <div className="color-presets" style={{ display: 'flex', flexWrap: 'wrap', gap: 2, marginBottom: 4 }}>
+      <div className="color-presets">
         {Object.keys(colorPresets).map(id => (
           <button key={id} className="btn sm" onClick={() => handlePreset(id)}>{presetNames[id]}</button>
         ))}
       </div>
-      <div className="color-keys-list" style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <div className="color-keys-list">
         {colorKeys.map((key, idx) => (
-          <div key={idx} style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+          <div key={idx} className="color-key-row">
             <input type="number" value={key.t} step={0.01} min={0} max={1} className="n40" onChange={(e) => handleKeyChange(idx, 't', e.target.value)} />
-            <input type="color" value={`#${Math.round(key.r*255).toString(16).padStart(2,'0')}${Math.round(key.g*255).toString(16).padStart(2,'0')}${Math.round(key.b*255).toString(16).padStart(2,'0')}`} onChange={(e) => handleColorChange(idx, e.target.value)} style={{ width: 28, height: 20, padding: 0, border: 'none', cursor: 'pointer' }} />
+            <input type="color" value={`#${Math.round(key.r*255).toString(16).padStart(2,'0')}${Math.round(key.g*255).toString(16).padStart(2,'0')}${Math.round(key.b*255).toString(16).padStart(2,'0')}`} onChange={(e) => handleColorChange(idx, e.target.value)} className="color-picker" />
             <input type="number" value={key.a} step={0.01} min={0} max={1} className="n40" onChange={(e) => handleKeyChange(idx, 'a', e.target.value)} />
-            <button className="btn sm" onClick={() => handleRemoveKey(idx)} disabled={colorKeys.length <= 1} style={{ padding: '0 4px', fontSize: 10 }}>✕</button>
+            <button className="btn sm color-key-btn" onClick={() => handleRemoveKey(idx)} disabled={colorKeys.length <= 1}>✕</button>
           </div>
         ))}
       </div>
-      <button className="btn sm" onClick={handleAddKey} style={{ marginTop: 4 }}>{t('pp_color_add_key')}</button>
+      <button className="btn sm color-add-key" onClick={handleAddKey}>{t('pp_color_add_key')}</button>
     </div>
   );
 }

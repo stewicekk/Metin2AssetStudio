@@ -62,14 +62,14 @@ export function TimelinePanel() {
   return (
     <div className="timeline-panel">
       <div className="timeline-controls">
-        <button className="btn sm" onClick={handlePlay} title={t('tl_play')}>▶</button>
-        <button className="btn sm" onClick={handlePause} title={t('tl_pause')}>⏸</button>
-        <button className="btn sm" onClick={handleStop} title={t('tl_stop')}>■</button>
-        <button className={'btn sm' + (autoCycle ? ' active' : '')} onClick={handleToggleCycle} title={t('tl_cycle')}>↺</button>
+        <button className="btn sm" onClick={handlePlay} title={t('tl_play')}>{t('tl_play')}</button>
+        <button className="btn sm" onClick={handlePause} title={t('tl_pause')}>{t('tl_pause')}</button>
+        <button className="btn sm" onClick={handleStop} title={t('tl_stop')}>{t('tl_stop')}</button>
+        <button className={'btn sm' + (autoCycle ? ' active' : '')} onClick={handleToggleCycle} title={t('tl_cycle')}>{t('tl_cycle')}</button>
       </div>
       <div ref={trackRef} className="timeline-tracks"
         onClick={handleSeek}
-        style={{ height: tracks.length > 0 ? `${12 + tracks.length * 14}px` : 24, minHeight: 24 }}
+        style={{ height: tracks.length > 0 ? `${12 + tracks.length * 14}px` : 24 }}
       >
         {tracks.map(t => (
           <div key={t.uid} className="timeline-track-bar"
@@ -77,9 +77,7 @@ export function TimelinePanel() {
               left: `${t.start * 100}%`,
               width: `${Math.max(t.dur * 100, 2)}%`,
               top: `${4 + t.idx * 14}px`,
-              height: 10,
               background: t.color,
-              opacity: 0.7,
             }}
           >
             {t.name.length * 4 < t.dur * 100 && t.name}

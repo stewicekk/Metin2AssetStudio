@@ -13,18 +13,14 @@ FROM node:20-alpine AS runtime
 
 WORKDIR /app
 
-# Copy server
 COPY server/package*.json server/
 RUN cd server && npm install --omit=dev
 
-# Copy built frontend
 COPY --from=builder /build/dist /app/frontend/dist
-COPY --from=builder /build/public/analyze-mse /app/frontend/public/analyze-mse
+COPY --from=builder /build/fixtures /app/frontend/fixtures
 
-# Copy server source
 COPY server/ server/
 
-# Create projects directory
 RUN mkdir -p /app/server/projects
 
 EXPOSE 3000

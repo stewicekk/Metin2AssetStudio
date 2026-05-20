@@ -357,8 +357,8 @@ function App() {
             <button className="btn sm" onClick={handleNew}>{t('btn_new')}</button>
             <button className="btn sm" onClick={() => loadInputRef.current?.click()}>{t('btn_load')}</button>
             <button className="btn sm primary" onClick={handleSaveProject}>{t('btn_save')}</button>
-            <button className="btn sm" onClick={handleSaveToBrowser} title={t('btn_save')}>💾</button>
-            <button className="btn sm" onClick={handleLoadProjectList} title={t('btn_load')}>📂</button>
+            <button className="btn sm" onClick={handleSaveToBrowser} title={t('app_saved_storage')}>Web</button>
+            <button className="btn sm" onClick={handleLoadProjectList} title={t('app_project_browser')}>Proj</button>
             <button className="btn sm" onClick={() => mseInputRef.current?.click()}>{t('btn_import')}</button>
             <button className="btn sm accent" onClick={handleExportZip}>{t('btn_export')}</button>
             <button className="btn sm" onClick={handleValidation}>{t('btn_validate')}</button>
@@ -386,13 +386,13 @@ function App() {
 
       <main id="center" className="studio-center">
         <div className="viewport-bar">
-          <button className="btn sm" onClick={() => setPlaying(true)} title={t('btn_play')}>▶</button>
-          <button className="btn sm" onClick={() => setPlaying(false)} title={t('btn_pause')}>⏸</button>
-          <button className="btn sm" onClick={handleStop} title={t('btn_stop')}>■</button>
-          <button className={`btn sm`} onClick={() => setAutoCycle(!autoCycle)} title={t('btn_autocycle')}>{autoCycle ? '↺' : '↻'}</button>
-          <button className="btn sm" onClick={handleWarmStart} title={t('btn_fill')}>⚡{t('btn_fill')}</button>
+          <button className="btn sm" onClick={() => setPlaying(true)} title={t('btn_play')}>{t('btn_play')}</button>
+          <button className="btn sm" onClick={() => setPlaying(false)} title={t('btn_pause')}>{t('btn_pause')}</button>
+          <button className="btn sm" onClick={handleStop} title={t('btn_stop')}>{t('btn_stop')}</button>
+          <button className={`btn sm` + (autoCycle ? ' active' : '')} onClick={() => setAutoCycle(!autoCycle)} title={t('btn_autocycle')}>{autoCycle ? t('btn_cycle_on') : t('btn_cycle_off')}</button>
+          <button className="btn sm" onClick={handleWarmStart} title={t('btn_fill')}>{t('btn_fill')}</button>
           <span className="sep-v" />
-          <button className="btn sm" onClick={() => cameraControllerRef.current?.reset()} title={t('btn_reset_camera')}>⌂</button>
+          <button className="btn sm" onClick={() => cameraControllerRef.current?.reset()} title={t('btn_reset_camera')}>{t('btn_reset_camera')}</button>
           <button className="btn sm" onClick={() => cameraControllerRef.current?.setView('front')} title={t('btn_front')}>{t('btn_front')}</button>
           <button className="btn sm" onClick={() => cameraControllerRef.current?.setView('top')} title={t('btn_top')}>{t('btn_top')}</button>
           <button className="btn sm" onClick={() => cameraControllerRef.current?.setView('persp')} title={t('btn_3d')}>{t('btn_3d')}</button>
