@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: metin2-asset-studio
+    env: node
+    region: frankfurt
+    plan: free
+    buildCommand: cd frontend && npm install --legacy-peer-deps && npm run build && cd ../server && npm install
+    startCommand: cd server && node src/index.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3000"
+      - key: HOST
+        value: "0.0.0.0"
+    disk:
+      name: projects
+      mountPath: /opt/render/project/src/server/projects
+      sizeGB: 1

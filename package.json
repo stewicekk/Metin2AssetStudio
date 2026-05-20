@@ -1,0 +1,19 @@
+{
+  "name": "metin2-asset-studio",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Metin2 Particle Effect Editor",
+  "scripts": {
+    "dev": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "test": "cd frontend && npm test",
+    "server": "cd server && npm start",
+    "pipeline": "cd server && powershell -File start-pipeline.ps1",
+    "pipeline:dev": "cd server && powershell -File start-pipeline.ps1 -dev",
+    "electron": "cd electron && npm start",
+    "electron:dev": "cd electron && npm run start:dev",
+    "electron:build": "cd electron && npm run build:all",
+    "desktop": "npm run build && npm run electron",
+    "install:all": "cd frontend && npm install && cd ../server && npm install && cd ../electron && npm install"
+  }
+}

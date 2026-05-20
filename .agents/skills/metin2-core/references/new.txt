@@ -1,0 +1,61 @@
+# Metin2 Effect Studio PRO v3.3 — MSE Export
+# 19. 5. 2026
+
+EffectName	"MyEffect"
+ParticleSystemCount	1
+
+# --- Particle System 1: FireBall_Main ---
+StartParticleSystem
+	SystemName	"FireBall_Main"
+	BirthRate	100.0000
+	MaxParticleCount	512
+	LifeTime	1.2000
+	LifeTimeRnd	0.4000
+	BurstCount	120
+	StartDelay	0.0000
+	Loop	FALSE
+	LifeCycle	2.0000
+	CoordType	WORLD
+	RotationType	RANDOM
+	SpawnShape	POINT
+	SpawnRadius	0.9100
+	Speed	2.0000
+	SpeedRnd	0.8000
+	Spread	360.0000
+	DirectionYaw	228.0000
+	DirectionPitch	71.0000
+	GravityVector	0.0000	0.5000	0.0000
+	AirResistance	2.8000
+	SizeX	0.7000
+	SizeY	0.7000
+	SizeRnd	0.3000
+	RotMin	0.0000
+	RotMax	360.0000
+	RotSpeedMin	15.0000
+	RotSpeedMax	75.0000
+	BlendType	ADD
+	TextureFileName	"myeffect_fireball_main.tga"
+	TextureAnimType	1
+	TextureAnimFrame	1	1
+	TextureAnimFPS	12
+	ColorKeyframeCount	3
+	ColorKeyframe	0.0000	255	255	204	255
+	ColorKeyframe	0.5000	255	242	128	230
+	ColorKeyframe	1.0000	255	230	51	0
+	SizeCurveCount	3
+	SizeCurve	0.0000	0.6000
+	SizeCurve	0.4000	1.2000
+	SizeCurve	1.0000	0.2000
+	AlphaCurveCount	4
+	AlphaCurve	0.0000	0.0000
+	AlphaCurve	0.2000	0.9000
+	AlphaCurve	0.8000	0.7000
+	AlphaCurve	1.0000	0.0000
+	SpeedCurveCount	2
+	SpeedCurve	0.0000	1.0000
+	SpeedCurve	1.0000	1.0000
+	SpinCurveCount	2
+	SpinCurve	0.0000	1.0000
+	SpinCurve	1.0000	1.0000
+EndParticleSystem
+

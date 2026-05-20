@@ -1,0 +1,26 @@
+# fly.toml for Fly.io deployment
+# Deploy: fly launch --region fra && fly deploy
+
+app = "metin2-asset-studio"
+primary_region = "fra"
+
+[build]
+  builder = "node"
+  buildpacks = []
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+[[mounts]]
+  source = "projects_data"
+  destination = "/app/server/projects"
+
+[env]
+  NODE_ENV = "production"
+  PORT = "3000"
+  HOST = "0.0.0.0"

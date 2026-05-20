@@ -1,0 +1,104 @@
+{
+  "name": "metin2-asset-studio-desktop",
+  "version": "1.0.0",
+  "description": "Metin2 Asset Studio - Particle Effect Editor for Metin2",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "start:dev": "cross-env NODE_ENV=development electron .",
+    "build:win": "electron-builder --win --config",
+    "build:linux": "electron-builder --linux",
+    "build:mac": "electron-builder --mac",
+    "build:all": "electron-builder --win --linux --mac"
+  },
+  "build": {
+    "appId": "com.metin2.asset-studio",
+    "productName": "Metin2 Asset Studio",
+    "directories": {
+      "output": "dist-electron"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "updater.js",
+      "crashReporter.js",
+      "../frontend/dist/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "../frontend/public/icon.svg"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "allowToChangeInstallationDirectory": false,
+      "installerIcon": "../frontend/public/icon.svg",
+      "uninstallerIcon": "../frontend/public/icon.svg",
+      "installerHeaderIcon": "../frontend/public/icon.svg",
+      "shortcutName": "Metin2 Asset Studio"
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "../frontend/public/icon.svg",
+      "category": "Development",
+      "synopsis": "Metin2 Particle Effect Editor",
+      "description": "A visual editor for Metin2 particle effects (MSE, EFF, MDE formats)."
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        }
+      ],
+      "icon": "../frontend/public/icon.svg",
+      "category": "public.app-category.developer-tools",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false
+    },
+    "dmg": {
+      "title": "Metin2 Asset Studio ${version}",
+      "icon": "../frontend/public/icon.svg",
+      "contents": [
+        { "x": 130, "y": 220 },
+        { "x": 410, "y": 220, "type": "link", "path": "/Applications" }
+      ]
+    },
+    "fileAssociations": [
+      {
+        "ext": "mse",
+        "name": "Metin2 Particle Effect",
+        "description": "Metin2 Particle System Effect",
+        "role": "Editor",
+        "icon": "../frontend/public/icon.svg"
+      }
+    ],
+    "publish": {
+      "provider": "github",
+      "owner": "anomalyco",
+      "repo": "Metin2-Asset-Studio",
+      "releaseType": "release"
+    },
+    "artifactName": "${productName}-Setup-${version}-${os}-${arch}.${ext}"
+  },
+  "dependencies": {
+    "electron-updater": "^6.3.0"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "electron": "^35.0.0",
+    "electron-builder": "^25.0.0"
+  }
+}

@@ -1,0 +1,361 @@
+export type Locale = 'en' | 'cs';
+
+export interface Dict {
+  // App shell
+  app_title: string;
+  app_subtitle: string;
+  app_pro: string;
+  app_new_project: string;
+  app_load_failed: string;
+  app_saved_storage: string;
+  app_deleted: string;
+  app_cannot_export: string;
+  app_project_browser: string;
+  app_no_projects: string;
+  app_open: string;
+
+  // Tabs
+  tab_props: string;
+  tab_presets: string;
+  tab_library: string;
+  tab_scene: string;
+
+  // Actions
+  btn_new: string;
+  btn_load: string;
+  btn_save: string;
+  btn_import: string;
+  btn_export: string;
+  btn_validate: string;
+  btn_play: string;
+  btn_pause: string;
+  btn_stop: string;
+  btn_autocycle: string;
+  btn_fill: string;
+  btn_reset_camera: string;
+  btn_front: string;
+  btn_top: string;
+  btn_3d: string;
+  btn_mde: string;
+  btn_eff: string;
+  btn_copy: string;
+  btn_download: string;
+  btn_close: string;
+
+  // Viewport
+  vp_fps: string;
+  vp_title: string;
+  vp_particles: string;
+  vp_effects: string;
+  vp_emitters: string;
+  vp_orbit: string;
+
+  // Scene
+  scene_bg: string;
+  scene_grid: string;
+  scene_axis: string;
+  scene_char: string;
+  scene_spin: string;
+  scene_bone: string;
+  scene_bone_root: string;
+  scene_bone_spine: string;
+  scene_bone_rhand: string;
+  scene_bone_lhand: string;
+  scene_bone_head: string;
+  scene_bone_chest: string;
+  scene_bone_rfoot: string;
+  scene_bone_lfoot: string;
+  scene_fog: string;
+  scene_fog_density: string;
+  scene_ambient: string;
+  scene_fov: string;
+  scene_bloom: string;
+  scene_bloom_label: string;
+  scene_floor: string;
+  scene_floor_label: string;
+  scene_scale: string;
+  scene_particle_debug: string;
+  scene_auto_play: string;
+  scene_hi_prec: string;
+  scene_prec_4: string;
+  scene_prec_6: string;
+  scene_prec_2: string;
+  scene_shortcuts: string;
+  scene_shortcut_play: string;
+  scene_shortcut_autocycle: string;
+  scene_shortcut_fill: string;
+  scene_shortcut_reset: string;
+  scene_shortcut_view: string;
+  scene_shortcut_undo: string;
+  scene_shortcut_redo: string;
+  scene_shortcut_dup: string;
+  scene_shortcut_save: string;
+  scene_shortcut_copy: string;
+  scene_shortcut_paste: string;
+  scene_shortcut_delete: string;
+  scene_shortcut_orbit: string;
+  scene_shortcut_pan: string;
+  scene_shortcut_zoom: string;
+  scene_lang_en: string;
+  scene_lang_cs: string;
+
+  // Emitter editor
+  ee_name: string;
+  ee_visible: string;
+  ee_blend: string;
+  ee_shape: string;
+  ee_rate: string;
+  ee_burst: string;
+  ee_life: string;
+  ee_life_rnd: string;
+  ee_max_p: string;
+  ee_loop: string;
+  ee_cycle: string;
+  ee_delay: string;
+  ee_speed: string;
+  ee_speed_rnd: string;
+  ee_spread: string;
+  ee_dir_yaw: string;
+  ee_dir_pitch: string;
+  ee_gravity: string;
+  ee_wind_x: string;
+  ee_wind_z: string;
+  ee_drag: string;
+  ee_turb: string;
+  ee_turb_freq: string;
+  ee_size_x: string;
+  ee_size_y: string;
+  ee_size_rnd: string;
+  ee_size_nonuniform: string;
+  ee_spin: string;
+  ee_spin_rnd: string;
+  ee_init_rot: string;
+  ee_init_rot_rnd: string;
+  ee_vel_stretch: string;
+  ee_texture: string;
+  ee_sheet_cols: string;
+  ee_sheet_rows: string;
+  ee_uv_anim: string;
+  ee_anim_fps: string;
+  ee_uv_scroll_x: string;
+  ee_uv_scroll_y: string;
+  ee_shape_radius: string;
+  ee_ground_bounce: string;
+  ee_bounce_fac: string;
+  ee_attractor_str: string;
+  ee_attractor_y: string;
+  ee_color_mod: string;
+  ee_rot_type: string;
+  ee_coord_type: string;
+  ee_emit_surface: string;
+  ee_emit_surface_surface: string;
+  ee_emit_surface_edge: string;
+  ee_alpha_curve: string;
+
+  // Validation
+  val_title: string;
+  val_no_issues: string;
+  val_errors: string;
+  val_warnings: string;
+  val_infos: string;
+
+  // Export
+  export_title: string;
+  export_warnings: string;
+  export_complete: string;
+  export_instructions: string;
+
+  // Profile
+  prof_title: string;
+  prof_frame: string;
+  prof_cpu: string;
+  prof_particles: string;
+  prof_point_em: string;
+  prof_mesh_em: string;
+  prof_vram: string;
+  prof_draw_calls: string;
+  prof_triangles: string;
+
+  // Settings
+  set_theme: string;
+  set_dark: string;
+  set_light: string;
+  set_neon: string;
+  set_crimson: string;
+  set_emerald: string;
+  set_perf: string;
+  set_debug: string;
+  set_precision: string;
+  set_language: string;
+
+  // Toast / status
+  toast_imported: string;
+  toast_saved: string;
+  toast_loaded: string;
+  toast_exported: string;
+  toast_undo: string;
+  toast_redo: string;
+  toast_error: string;
+  toast_new_project: string;
+  toast_load_failed: string;
+  toast_mde_exported: string;
+  toast_eff_exported: string;
+  toast_saved_storage: string;
+  toast_deleted: string;
+  toast_cannot_export: string;
+
+  // Placeholder / generic
+  loading: string;
+  error: string;
+  none: string;
+
+  // EmitterList
+  el_title: string;
+  el_add: string;
+  el_duplicate: string;
+  el_delete: string;
+  el_move_up: string;
+  el_move_down: string;
+  el_randomize: string;
+  el_copy: string;
+  el_paste: string;
+  el_visible_on: string;
+  el_visible_off: string;
+
+  // ValidationPanel
+  vp_checks: string;
+
+  // DependencyPanel
+  dp_title: string;
+  dp_no_import: string;
+  dp_hint: string;
+  dp_nodes: string;
+
+  // LibraryPanel
+  lib_hint: string;
+  lib_emitter: string;
+  lib_blend: string;
+  lib_shape: string;
+
+  // PresetsPanel
+  pre_search: string;
+
+  // Timeline
+  tl_play: string;
+  tl_pause: string;
+  tl_stop: string;
+  tl_cycle: string;
+  tl_export_mse: string;
+  tl_export_eff: string;
+  tl_export_mde: string;
+
+  // PropsPanel
+  pp_no_selected: string;
+  pp_no_hint: string;
+  pp_section_emitter: string;
+  pp_section_physics: string;
+  pp_section_size: string;
+  pp_section_advanced: string;
+  pp_section_texture: string;
+  pp_section_curves: string;
+  pp_section_colors: string;
+  pp_blend_add: string;
+  pp_blend_alpha: string;
+  pp_blend_modulate: string;
+  pp_shape_point: string;
+  pp_shape_cone: string;
+  pp_shape_box: string;
+  pp_shape_sphere: string;
+  pp_shape_spherevol: string;
+  pp_shape_ring: string;
+  pp_shape_disc: string;
+  pp_loop_yes: string;
+  pp_loop_no: string;
+  pp_hint_burst: string;
+  pp_hint_plusminus: string;
+  pp_coord_world: string;
+  pp_coord_local: string;
+  pp_rot_none: string;
+  pp_rot_random: string;
+  pp_rot_spin: string;
+  pp_uv_loop: string;
+  pp_uv_once: string;
+  pp_uv_rand: string;
+  pp_uv_life: string;
+  pp_color_multiply: string;
+  pp_color_add: string;
+  pp_curve_reset: string;
+  pp_curve_flat: string;
+  pp_curve_add: string;
+  pp_tex_circle: string;
+  pp_tex_star: string;
+  pp_tex_ring: string;
+  pp_tex_spark: string;
+  pp_tex_cross: string;
+  pp_tex_lensflare: string;
+  pp_tex_smoke: string;
+  pp_tex_diamond: string;
+  pp_tex_glow: string;
+  pp_tex_hexagon: string;
+  pp_tex_flame: string;
+  pp_tex_arrow: string;
+  pp_tex_debris: string;
+  pp_tex_custom: string;
+
+  // Color presets
+  pp_color_fire: string;
+  pp_color_ice: string;
+  pp_color_lightning: string;
+  pp_color_blood: string;
+  pp_color_add_key: string;
+
+  // PluginStatusPanel
+  pp_title: string;
+  pp_count: string;
+  pp_export: string;
+  pp_transform: string;
+  pp_import: string;
+  pp_type_export: string;
+  pp_type_transform: string;
+  pp_type_import: string;
+  pp_empty: string;
+  tab_plugins: string;
+
+  // GraphPanel
+  graph_title: string;
+  graph_nodes: string;
+  graph_links: string;
+  graph_blend: string;
+  graph_shape: string;
+
+  // Error boundary
+  err_props: string;
+  err_presets: string;
+  err_library: string;
+  err_plugins: string;
+  err_scene: string;
+  err_settings: string;
+  err_viewport: string;
+  err_validation: string;
+  err_dependencies: string;
+  err_graph: string;
+  err_profiling: string;
+  err_default: string;
+
+  // Plugin system
+  plugin_title: string;
+  plugin_no_plugins: string;
+  plugin_export: string;
+  plugin_transform: string;
+  plugin_import: string;
+  plugin_version: string;
+
+  // Export Modal
+  export_mse_title: string;
+  export_eff_title: string;
+  export_mde_title: string;
+  export_validation_title: string;
+
+  // Validation issues
+  val_issues: string;
+}

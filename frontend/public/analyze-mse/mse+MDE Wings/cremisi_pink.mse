@@ -1,0 +1,103 @@
+BoundingSphereRadius   0.000000
+BoundingSpherePosition 0.000000 0.000000 0.000000
+
+Group Mesh
+{
+    StartTime           0.000000
+    List TimeEventPosition
+    {
+        0.000000 "MOVING_TYPE_DIRECT" 21.660000 -12.982000 0.000000
+    }
+    
+    MeshFileName               	"test_resize_v3_3.mde"
+    MeshAnimationLoopEnable    	1
+    MeshAnimationLoopCount     	0
+    MeshAnimationFrameDelay    	0.020000
+    
+    MeshElementCount           	5
+    Group MeshElement00
+    {
+        BillboardType              	0
+        BlendingEnable             	1
+        BlendingSrcType            	3
+        BlendingDestType           	2
+        
+        TextureAnimationLoopEnable 	1
+        TextureAnimationFrameDelay 	0.020000
+        TextureAnimationStartFrame 	0
+        
+        ColorOperationType         	4
+        ColorFactor                	1.000000 0.000000 0.835294 1.000000
+        List TimeEventAlpha
+        {
+        }
+    }
+    Group MeshElement01
+    {
+        BillboardType              	0
+        BlendingEnable             	1
+        BlendingSrcType            	3
+        BlendingDestType           	2
+        
+        TextureAnimationLoopEnable 	1
+        TextureAnimationFrameDelay 	0.020000
+        TextureAnimationStartFrame 	0
+        
+        ColorOperationType         	4
+        ColorFactor                	1.000000 1.000000 1.000000 1.000000
+        List TimeEventAlpha
+        {
+        }
+    }
+    Group MeshElement02
+    {
+        BillboardType              	0
+        BlendingEnable             	1
+        BlendingSrcType            	3
+        BlendingDestType           	13
+        
+        TextureAnimationLoopEnable 	1
+        TextureAnimationFrameDelay 	0.020000
+        TextureAnimationStartFrame 	0
+        
+        ColorOperationType         	4
+        ColorFactor                	1.000000 0.764706 0.031373 1.000000
+        List TimeEventAlpha
+        {
+        }
+    }
+    Group MeshElement03
+    {
+        BillboardType              	0
+        BlendingEnable             	1
+        BlendingSrcType            	12
+        BlendingDestType           	6
+        
+        TextureAnimationLoopEnable 	1
+        TextureAnimationFrameDelay 	0.020000
+        TextureAnimationStartFrame 	0
+        
+        ColorOperationType         	4
+        ColorFactor                	0.517647 0.000000 0.533333 1.000000
+        List TimeEventAlpha
+        {
+        }
+    }
+    Group MeshElement04
+    {
+        BillboardType              	0
+        BlendingEnable             	0
+        BlendingSrcType            	3
+        BlendingDestType           	3
+        
+        TextureAnimationLoopEnable 	1
+        TextureAnimationFrameDelay 	0.020000
+        TextureAnimationStartFrame 	0
+        
+        ColorOperationType         	4
+        ColorFactor                	1.000000 1.000000 1.000000 1.000000
+        List TimeEventAlpha
+        {
+        }
+    }
+}

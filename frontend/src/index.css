@@ -1,0 +1,10 @@
+@import './styles/variables.css';
+@import './styles/layout.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+}

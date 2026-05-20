@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+.python-version
+
+# Build output
+dist/
+dist-electron/
+frontend/dist/
+
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Logs
+*.log
+server/logs/
+logs/
+
+# Env
+.env
+.env.local
+.env.production
+
+# IDE
+.vscode/
+.idea/
+*.sublime-*
+
+# Python
+*.egg-info/
+.venv/
+venv/
+
+# Electron
+out/
+release/
+
+# Temp
+temp/
+tmp/
