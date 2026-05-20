@@ -1,34 +1,10 @@
 import { useAppStore } from '../store/useAppStore';
 import { useT } from '../i18n';
 
-export function SceneSettings() {
+export function SettingsPanel() {
   const { t, locale, setLocale } = useT();
   const settings = useAppStore(s => s.settings);
   const setSettings = useAppStore(s => s.setSettings);
-  const sceneBg = useAppStore(s => s.sceneBg);
-  const setSceneBg = useAppStore(s => s.setSceneBg);
-  const showGrid = useAppStore(s => s.showGrid);
-  const setShowGrid = useAppStore(s => s.setShowGrid);
-  const showAxis = useAppStore(s => s.showAxis);
-  const setShowAxis = useAppStore(s => s.setShowAxis);
-  const showChar = useAppStore(s => s.showChar);
-  const setShowChar = useAppStore(s => s.setShowChar);
-  const charSpin = useAppStore(s => s.charSpin);
-  const setCharSpin = useAppStore(s => s.setCharSpin);
-  const envBone = useAppStore(s => s.envBone);
-  const setEnvBone = useAppStore(s => s.setEnvBone);
-  const envFog = useAppStore(s => s.envFog);
-  const setEnvFog = useAppStore(s => s.setEnvFog);
-  const envFogDensity = useAppStore(s => s.envFogDensity);
-  const setEnvFogDensity = useAppStore(s => s.setEnvFogDensity);
-  const envAmbient = useAppStore(s => s.envAmbient);
-  const setEnvAmbient = useAppStore(s => s.setEnvAmbient);
-  const envFov = useAppStore(s => s.envFov);
-  const setEnvFov = useAppStore(s => s.setEnvFov);
-  const envBloom = useAppStore(s => s.envBloom);
-  const setEnvBloom = useAppStore(s => s.setEnvBloom);
-  const envFloor = useAppStore(s => s.envFloor);
-  const setEnvFloor = useAppStore(s => s.setEnvFloor);
 
   const applyTheme = (theme: string) => {
     setSettings({ theme });
@@ -36,11 +12,8 @@ export function SceneSettings() {
   };
 
   const themeNames: Record<string, string> = {
-    dark: t('set_dark'),
-    neon: t('set_neon'),
-    crimson: t('set_crimson'),
-    emerald: t('set_emerald'),
-    light: t('set_light'),
+    dark: t('set_dark'), neon: t('set_neon'), crimson: t('set_crimson'),
+    emerald: t('set_emerald'), light: t('set_light'),
   };
 
   const themeGradients: Record<string, string> = {
@@ -55,68 +28,6 @@ export function SceneSettings() {
 
   return (
     <div className="scene-settings">
-      <div className="section">
-        <div className="sec-hdr open"><span>🌍 {t('tab_scene')}</span><span className="arr">▶</span></div>
-        <div className="sec-body open">
-          <div className="row">
-            <label className="lbl w80">{t('scene_bg')}</label>
-            <input type="color" value={sceneBg} onChange={e => setSceneBg(e.target.value)} />
-          </div>
-          <div className="row">
-            <label className="lbl w80">{t('scene_grid')}</label>
-            <input type="checkbox" checked={showGrid} onChange={e => setShowGrid(e.target.checked)} />
-            <label className="lbl">{t('scene_axis')}</label>
-            <input type="checkbox" checked={showAxis} onChange={e => setShowAxis(e.target.checked)} />
-          </div>
-          <div className="row">
-            <label className="lbl w80">{t('scene_char')}</label>
-            <input type="checkbox" checked={showChar} onChange={e => setShowChar(e.target.checked)} />
-            <label className="lbl">{t('scene_spin')}</label>
-            <input type="checkbox" checked={charSpin} onChange={e => setCharSpin(e.target.checked)} />
-          </div>
-          <div className="row">
-            <label className="lbl w80">{t('scene_bone')}</label>
-            <select value={envBone} onChange={e => setEnvBone(e.target.value)}>
-              <option value="root">{t('scene_bone_root')}</option>
-              <option value="spine">{t('scene_bone_spine')}</option>
-              <option value="rhand">{t('scene_bone_rhand')}</option>
-              <option value="lhand">{t('scene_bone_lhand')}</option>
-              <option value="head">{t('scene_bone_head')}</option>
-              <option value="chest">{t('scene_bone_chest')}</option>
-              <option value="rfoot">{t('scene_bone_rfoot')}</option>
-              <option value="lfoot">{t('scene_bone_lfoot')}</option>
-            </select>
-          </div>
-          <div className="row">
-            <label className="lbl w80">{t('scene_fog')}</label>
-            <input type="checkbox" checked={envFog} onChange={e => setEnvFog(e.target.checked)} />
-            <input type="range" min={0.001} max={0.15} step={0.001} value={envFogDensity}
-              onChange={e => setEnvFogDensity(parseFloat(e.target.value))} className="flex1" />
-            <span className="n40 mono ta-r">{envFog ? envFogDensity.toFixed(3) : t('none')}</span>
-          </div>
-          <div className="row">
-            <label className="lbl w80">{t('scene_ambient')}</label>
-            <input type="color" value={envAmbient} onChange={e => setEnvAmbient(e.target.value)} />
-          </div>
-          <div className="row">
-            <label className="lbl w80">{t('scene_fov')}</label>
-            <input type="range" min={20} max={100} value={envFov}
-              onChange={e => setEnvFov(parseInt(e.target.value))} className="flex1" />
-            <span className="n40 mono ta-r">{envFov}°</span>
-          </div>
-          <div className="row">
-            <label className="lbl w80">{t('scene_bloom')}</label>
-            <input type="checkbox" checked={envBloom} onChange={e => setEnvBloom(e.target.checked)} />
-            <span className="hint">{t('scene_bloom_label')}</span>
-          </div>
-          <div className="row">
-            <label className="lbl w80">{t('scene_floor')}</label>
-            <input type="checkbox" checked={envFloor} onChange={e => setEnvFloor(e.target.checked)} />
-            <span className="hint">{t('scene_floor_label')}</span>
-          </div>
-        </div>
-      </div>
-
       <div className="section">
         <div className="sec-hdr open"><span>🎨 {t('set_theme')}</span><span className="arr">▶</span></div>
         <div className="sec-body open">

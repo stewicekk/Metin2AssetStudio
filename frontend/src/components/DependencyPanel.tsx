@@ -10,12 +10,11 @@ export function DependencyPanel() {
   const graph = useMemo(() => active ? buildDependencyGraph(active.rawData) : null, [active]);
 
   return (
-    <div className="studio-card dependency-panel">
-      <div className="studio-card__header">
-        <span>{t('dp_title')}</span>
-        <span className="muted">{graph ? `${graph.nodes.length} ${t('dp_nodes')}` : t('dp_no_import')}</span>
-      </div>
-      {!graph ? <p className="muted">{t('dp_hint')}</p> : (
+    <div className="dependency-panel">
+      <div className="panel-title">{t('dp_title')} <span className="count">{graph ? `${graph.nodes.length} ${t('dp_nodes')}` : ''}</span></div>
+      {!graph ? (
+        <div className="empty-state"><p className="muted">{t('dp_hint')}</p></div>
+      ) : (
         <div className="dependency-list">
           {graph.nodes.map((node) => (
             <div className="dependency-row" key={node.id}>

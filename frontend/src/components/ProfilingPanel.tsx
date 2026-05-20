@@ -14,11 +14,8 @@ export function ProfilingPanel() {
   const memKb = (data.memoryBytes / 1024).toFixed(1);
 
   return (
-    <div className="studio-card profiling-panel">
-      <div className="studio-card__header">
-        <span>{t('prof_title')}</span>
-        <span className="muted">{data.fps} {t('vp_fps')}</span>
-      </div>
+    <div className="profiling-panel">
+      <div className="panel-title">{t('prof_title')} <span className="count">{data.fps} {t('vp_fps')}</span></div>
       <div className="profiling-grid">
         <div className="prof-row">
           <span className="prof-label">{t('prof_frame')}</span>

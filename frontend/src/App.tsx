@@ -8,6 +8,7 @@ import { LibraryPanel } from './components/LibraryPanel';
 import { PresetsPanel } from './components/PresetsPanel';
 import { PropsPanel } from './components/PropsPanel';
 import { SceneSettings } from './components/SceneSettings';
+import { SettingsPanel } from './components/SettingsPanel';
 import { PluginStatusPanel } from './components/PluginStatusPanel';
 import { TimelinePanel } from './components/TimelinePanel';
 import { ValidationPanel } from './components/ValidationPanel';
@@ -93,15 +94,15 @@ function App() {
         case 'KeyS':
           if (e.ctrlKey) {
             e.preventDefault();
-            const state = useAppStore.getState();
-            const result = pluginManager.export(state.emitters, 'mse', { effectName: state.exportEffectName });
-            if (result) downloadText(result.data, `${state.exportEffectName}.mse`);
+            const st = useAppStore.getState();
+            const result = pluginManager.export(st.emitters, 'mse', { effectName: st.exportEffectName });
+            if (result) downloadText(result.data, `${st.exportEffectName}.mse`);
           }
           break;
         case 'KeyC':
           if (e.ctrlKey && state.activeEmitterId) {
             e.preventDefault();
-            const emitter = state.emitters.find(e => e.uid === state.activeEmitterId);
+            const emitter = state.emitters.find(e2 => e2.uid === state.activeEmitterId);
             if (emitter) state.setCopiedEmitter(JSON.parse(JSON.stringify(emitter)));
           }
           break;
@@ -227,8 +228,6 @@ function App() {
       return;
     }
 
-    const instructions = t('export_instructions').split('\n').join('\n');
-
     const fullContent = [
       `--- ${t('export_title')} ---`,
       '',
@@ -239,10 +238,10 @@ function App() {
       projectJson,
       '',
       '--- VALIDATION ---',
-      issues.length === 0 ? `\u2713 ${t('val_no_issues')}` : issues.map(i => `[${i.type.toUpperCase()}] ${i.emitter}: ${i.message}`).join('\n'),
+      issues.length === 0 ? `✓ ${t('val_no_issues')}` : issues.map(i => `[${i.type.toUpperCase()}] ${i.emitter}: ${i.message}`).join('\n'),
       '',
       '--- INSTRUCTIONS ---',
-      instructions,
+      t('export_instructions').split('\n').join('\n'),
     ].join('\n\n');
 
     const blob = new Blob([fullContent], { type: 'text/plain' });
@@ -259,15 +258,13 @@ function App() {
     const issues = useAppStore.getState().validateForExport();
     const errors = issues.filter(i => i.type === 'error');
     const warnings = issues.filter(i => i.type === 'warning');
-    const infos = issues.filter(i => i.type === 'info');
 
     let msg = `${t('export_validation_title')}:\n`;
-    if (errors.length === 0 && warnings.length === 0 && infos.length === 0) {
-      msg += `\n\u2713 ${t('val_no_issues')}`;
+    if (errors.length === 0 && warnings.length === 0) {
+      msg += `\n✓ ${t('val_no_issues')}`;
     } else {
-      if (errors.length > 0) msg += `\n\u274C ${errors.length} ${t('val_errors')}:\n${errors.map(e => `  \u2022 ${e.emitter}: ${e.message}`).join('\n')}`;
-      if (warnings.length > 0) msg += `\n\u26A0\uFE0F ${warnings.length} ${t('val_warnings')}:\n${warnings.map(w => `  \u2022 ${w.emitter}: ${w.message}`).join('\n')}`;
-      if (infos.length > 0) msg += `\n\u2139\uFE0F ${infos.length} ${t('val_infos')}:\n${infos.map(i => `  \u2022 ${i.emitter}: ${i.message}`).join('\n')}`;
+      if (errors.length > 0) msg += `\n✗ ${errors.length} ${t('val_errors')}:\n${errors.map(e => `  • ${e.emitter}: ${e.message}`).join('\n')}`;
+      if (warnings.length > 0) msg += `\n⚠ ${warnings.length} ${t('val_warnings')}:\n${warnings.map(w => `  • ${w.emitter}: ${w.message}`).join('\n')}`;
     }
     setExportModal({ open: true, title: t('export_validation_title'), content: msg, ext: 'txt' });
   };
@@ -347,15 +344,15 @@ function App() {
     { id: 'presets', label: t('tab_presets') },
     { id: 'library', label: t('tab_library') },
     { id: 'scene', label: t('tab_scene') },
-    { id: 'settings', label: '\u2699' },
+    { id: 'settings', label: '⚙' },
     { id: 'plugins', label: t('tab_plugins') },
   ];
 
   return (
-    <div className="studio-shell">
+    <div className="studio-shell" id="app-shell">
       <aside id="left" className="studio-left">
         <div className="appbar">
-          <div className="logo">{t('app_title')} <span>{t('app_pro')}</span></div>
+          <div className="logo">{t('app_title')}<span>{t('app_pro')}</span></div>
           <div className="top-actions">
             <button className="btn sm" onClick={handleNew}>{t('btn_new')}</button>
             <button className="btn sm" onClick={() => loadInputRef.current?.click()}>{t('btn_load')}</button>
@@ -382,34 +379,31 @@ function App() {
           {activeTab === 'presets' && <ErrorBoundary fallback={t('err_presets')}><PresetsPanel /></ErrorBoundary>}
           {activeTab === 'library' && <ErrorBoundary fallback={t('err_library')}><LibraryPanel /></ErrorBoundary>}
           {activeTab === 'scene' && <ErrorBoundary fallback={t('err_scene')}><SceneSettings /></ErrorBoundary>}
-          {activeTab === 'settings' && <ErrorBoundary fallback={t('err_settings')}><SceneSettings /></ErrorBoundary>}
+          {activeTab === 'settings' && <ErrorBoundary fallback={t('err_settings')}><SettingsPanel /></ErrorBoundary>}
           {activeTab === 'plugins' && <ErrorBoundary fallback={t('err_plugins')}><PluginStatusPanel /></ErrorBoundary>}
         </div>
       </aside>
 
       <main id="center" className="studio-center">
-        <div className="appbar viewport-bar">
-          <button className="btn" onClick={() => setPlaying(true)} title={t('btn_play')}>▶</button>
-          <button className="btn" onClick={() => setPlaying(false)} title={t('btn_pause')}>⏸</button>
-          <button className="btn" onClick={handleStop} title={t('btn_stop')}>■</button>
-          <button className="btn" onClick={() => setAutoCycle(!autoCycle)} title={t('btn_autocycle')} style={{ color: autoCycle ? 'var(--acc)' : undefined }}>
-            ↺
-          </button>
-          <button className="btn" onClick={handleWarmStart} title={t('btn_fill')}>⚡{t('btn_fill')}</button>
-          <span style={{ width: 1, height: 16, background: 'var(--border)', margin: '0 3px' }} />
-          <button className="btn" onClick={() => cameraControllerRef.current?.reset()} title={t('btn_reset_camera')}>⌂</button>
-          <button className="btn" onClick={() => cameraControllerRef.current?.setView('front')} title={t('btn_front')}>{t('btn_front')}</button>
-          <button className="btn" onClick={() => cameraControllerRef.current?.setView('top')} title={t('btn_top')}>{t('btn_top')}</button>
-          <button className="btn" onClick={() => cameraControllerRef.current?.setView('persp')} title={t('btn_3d')}>{t('btn_3d')}</button>
-          <span style={{ width: 1, height: 16, background: 'var(--border)', margin: '0 3px' }} />
+        <div className="viewport-bar">
+          <button className="btn sm" onClick={() => setPlaying(true)} title={t('btn_play')}>▶</button>
+          <button className="btn sm" onClick={() => setPlaying(false)} title={t('btn_pause')}>⏸</button>
+          <button className="btn sm" onClick={handleStop} title={t('btn_stop')}>■</button>
+          <button className={`btn sm`} onClick={() => setAutoCycle(!autoCycle)} title={t('btn_autocycle')}>{autoCycle ? '↺' : '↻'}</button>
+          <button className="btn sm" onClick={handleWarmStart} title={t('btn_fill')}>⚡{t('btn_fill')}</button>
+          <span className="sep-v" />
+          <button className="btn sm" onClick={() => cameraControllerRef.current?.reset()} title={t('btn_reset_camera')}>⌂</button>
+          <button className="btn sm" onClick={() => cameraControllerRef.current?.setView('front')} title={t('btn_front')}>{t('btn_front')}</button>
+          <button className="btn sm" onClick={() => cameraControllerRef.current?.setView('top')} title={t('btn_top')}>{t('btn_top')}</button>
+          <button className="btn sm" onClick={() => cameraControllerRef.current?.setView('persp')} title={t('btn_3d')}>{t('btn_3d')}</button>
+          <span className="sep-v" />
           <button className="btn sm accent" onClick={handleExportMDE} title={t('btn_mde')}>{t('btn_mde')}</button>
           <button className="btn sm" onClick={handleExportEFF} title={t('btn_eff')}>{t('btn_eff')}</button>
-          <span style={{ width: 1, height: 16, background: 'var(--border)', margin: '0 3px' }} />
-          <label className="lbl" style={{ fontSize: 9 }}>{t('scene_scale')}:</label>
+          <span className="sep-v" />
+          <label className="lbl">{t('scene_scale')}:</label>
           <input type="range" min={0.05} max={8} step={0.05} value={vpScale}
-            onChange={e => setVpScale(parseFloat(e.target.value))}
-            style={{ width: 65 }} />
-          <label className="lbl" style={{ fontSize: 9, minWidth: 27 }}>{vpScale.toFixed(1)}x</label>
+            onChange={e => setVpScale(parseFloat(e.target.value))} className="n60" />
+          <label className="lbl mono">{vpScale.toFixed(1)}x</label>
           <span className="muted" style={{ marginLeft: 'auto', fontSize: 8 }}>
             {emitters.length} {t('vp_emitters')} · {t('vp_orbit')}
           </span>
@@ -425,18 +419,10 @@ function App() {
           <div className="logo">{t('app_subtitle')}<span>{t('graph_title')}</span></div>
         </div>
         <div className="panel-scroll right-stack">
-          <ErrorBoundary fallback={t('err_validation')}>
-            <ValidationPanel />
-          </ErrorBoundary>
-          <ErrorBoundary fallback={t('err_dependencies')}>
-            <DependencyPanel />
-          </ErrorBoundary>
-          <ErrorBoundary fallback={t('err_graph')}>
-            <GraphPanel />
-          </ErrorBoundary>
-          <ErrorBoundary fallback={t('err_profiling')}>
-            <ProfilingPanel />
-          </ErrorBoundary>
+          <ErrorBoundary fallback={t('err_validation')}><ValidationPanel /></ErrorBoundary>
+          <ErrorBoundary fallback={t('err_dependencies')}><DependencyPanel /></ErrorBoundary>
+          <ErrorBoundary fallback={t('err_graph')}><GraphPanel /></ErrorBoundary>
+          <ErrorBoundary fallback={t('err_profiling')}><ProfilingPanel /></ErrorBoundary>
         </div>
       </aside>
 
@@ -458,21 +444,21 @@ function App() {
       )}
       {showProjects && (
         <div className="modal-overlay" onClick={() => setShowProjects(false)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 500 }}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>{t('app_project_browser')}</h2>
               <button className="modal-close" onClick={() => setShowProjects(false)}>×</button>
             </div>
-            <div style={{ maxHeight: 350, overflowY: 'auto', padding: '4px 0' }}>
+            <div className="modal-list">
               {projectList.length === 0 && (
-                <div className="muted" style={{ padding: 16, textAlign: 'center' }}>{t('app_no_projects')}</div>
+                <div className="empty-state"><p className="muted">{t('app_no_projects')}</p></div>
               )}
               {projectList.map(p => (
-                <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px', borderBottom: '1px solid var(--border)' }}>
-                  <span style={{ flex: 1, fontSize: 11, color: 'var(--text)' }}>{p.name}</span>
-                  <span className="muted" style={{ fontSize: 9 }}>{new Date(p.timestamp).toLocaleDateString()}</span>
+                <div key={p.id} className="modal-list-item">
+                  <span className="name">{p.name}</span>
+                  <span className="date">{new Date(p.timestamp).toLocaleDateString()}</span>
                   <button className="btn sm primary" onClick={() => p.id && handleOpenProject(p.id)}>{t('app_open')}</button>
-                  <button className="btn sm" onClick={() => p.id && handleDeleteProject(p.id)}>×</button>
+                  <button className="btn sm danger" onClick={() => p.id && handleDeleteProject(p.id)}>✕</button>
                 </div>
               ))}
             </div>
@@ -482,7 +468,7 @@ function App() {
           </div>
         </div>
       )}
-      <input type="file" ref={meshInputRef} accept=".obj,.gltf,.glb,.fbx" style={{ display: 'none' }} />
+      <input type="file" ref={meshInputRef} accept=".obj,.gltf,.glb,.fbx" hidden />
     </div>
   );
 }

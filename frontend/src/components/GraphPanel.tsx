@@ -74,17 +74,13 @@ export function GraphPanel() {
   const selectedEmitter = activeEmitterId ? emitters.find(e => e.uid === activeEmitterId) : null;
 
   return (
-    <div className="studio-card graph-panel">
-      <div className="studio-card__header">
-        <span>{t('graph_title')}</span>
-        <span className="muted">{graph.nodes.length} {t('graph_nodes')} / {graph.links.length} {t('graph_links')}</span>
+    <div className="graph-panel">
+      <div className="panel-title">
+        {t('graph_title')}
+        <span className="count">{graph.nodes.length} {t('graph_nodes')} / {graph.links.length} {t('graph_links')}</span>
       </div>
-      <div
-        className="graph-canvas"
-        ref={canvasRef}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
+      <div className="graph-canvas" ref={canvasRef}
+        onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}
       >
         <svg className="graph-links">
           {graph.links.map((link) => {
@@ -92,8 +88,7 @@ export function GraphPanel() {
             const toPos = positions[link.to];
             if (!fromPos || !toPos) return null;
             return (
-              <line
-                key={`${link.from}-${link.to}`}
+              <line key={`${link.from}-${link.to}`}
                 x1={fromPos.x + 60} y1={fromPos.y + 15}
                 x2={toPos.x} y2={toPos.y + 15}
                 stroke="var(--border)" strokeWidth="1"
@@ -102,9 +97,8 @@ export function GraphPanel() {
           })}
         </svg>
         {graph.nodes.map((node) => (
-          <div
-            key={node.id}
-            className={`graph-node graph-node--${node.kind} ${selectedNode === node.id ? 'selected' : ''}`}
+          <div key={node.id}
+            className={'graph-node graph-node--' + node.kind + (selectedNode === node.id ? ' selected' : '')}
             style={{ left: positions[node.id]?.x ?? node.x, top: positions[node.id]?.y ?? node.y }}
             onMouseDown={(e) => handleMouseDown(e, node.id)}
             onClick={() => handleNodeClick(node.id)}
@@ -115,7 +109,7 @@ export function GraphPanel() {
         ))}
       </div>
       {selectedEmitter && (
-        <div className="graph-properties" style={{ padding: 6, borderTop: '1px solid var(--border)', fontSize: 10, color: 'var(--text2)' }}>
+        <div className="graph-properties">
           {selectedEmitter.name} &mdash; {t('graph_blend')}: {selectedEmitter.blend}, {t('graph_shape')}: {selectedEmitter.shape}
         </div>
       )}

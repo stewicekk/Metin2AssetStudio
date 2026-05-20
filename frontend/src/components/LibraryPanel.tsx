@@ -20,22 +20,20 @@ export function LibraryPanel() {
 
   return (
     <div className="presets-panel">
-      <div style={{ fontSize: 9, color: 'var(--text3)', marginBottom: 5 }}>
-        {t('lib_hint')}
-      </div>
+      <div className="hint" style={{ marginBottom: 5 }}>{t('lib_hint')}</div>
       <div className="preset-grid">
         {LIBRARY_PACKS.map((pack, idx) => (
           <button key={idx} className="pbtn"
             onClick={() => {
               pack.emitters.forEach((em, ei) => {
-                const name = `${pack.name}_${ei}`;
+                const name = em.name ? `${pack.name}_${em.name}` : `${pack.name}_${ei}`;
                 addEmitterFromTemplate(name, em as any);
               });
             }}
           >
             <span className="picon">📦</span>
-            <span style={{ fontWeight: 600, fontSize: 10, color: 'var(--acc)' }}>{pack.name}</span>
-            <span style={{ fontSize: 8, color: 'var(--text3)', display: 'block' }}>{pack.desc}</span>
+            <span className="pname">{pack.name}</span>
+            <span className="pdesc">{pack.desc}</span>
             <span className="ptip">
               <div className="ptip-row"><span>{t('lib_emitter')}</span><span>{pack.emitters.length}</span></div>
               <div className="ptip-row"><span>{t('lib_blend')}</span><span>{pack.emitters[0].blend}</span></div>

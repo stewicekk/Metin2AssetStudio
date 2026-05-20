@@ -49,11 +49,10 @@ export function EmitterList() {
         {emitters.map((emitter) => (
           <div
             key={emitter.uid}
-            className={`emitter-row ${activeEmitterId === emitter.uid ? 'active' : ''}`}
+            className={'emitter-row' + (activeEmitterId === emitter.uid ? ' active' : '')}
             onClick={() => selectEmitter(emitter.uid)}
           >
-            <button
-              className="emit-vis"
+            <button className="emit-vis"
               onClick={(event) => {
                 event.stopPropagation();
                 updateEmitter(emitter.uid, { visible: !emitter.visible });
@@ -61,9 +60,9 @@ export function EmitterList() {
             >
               {emitter.visible ? t('el_visible_on') : t('el_visible_off')}
             </button>
-            <div className="emit-dot" style={{ backgroundColor: emitter.color }}></div>
+            <div className="emit-dot" style={{ backgroundColor: emitter.color }} />
             <span className="emit-name">{emitter.name}</span>
-            <span className={`badge ${emitter.blend === 'add' ? 'add' : emitter.blend === 'modulate' ? 'mod' : 'alp'}`}>
+            <span className={'badge ' + (emitter.blend === 'add' ? 'add' : emitter.blend === 'modulate' ? 'mod' : 'alp')}>
               {emitter.blend.toUpperCase()}
             </span>
           </div>

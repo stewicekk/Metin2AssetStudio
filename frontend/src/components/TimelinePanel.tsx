@@ -7,7 +7,6 @@ export function TimelinePanel() {
   const { t } = useT();
   const emitters = useAppStore(s => s.emitters);
   const globalTime = useAppStore(s => s.globalTime);
-  const playing = useAppStore(s => s.playing);
   const setPlaying = useAppStore(s => s.setPlaying);
   const setGlobalTime = useAppStore(s => s.setGlobalTime);
   const autoCycle = useAppStore(s => s.autoCycle);
@@ -66,52 +65,33 @@ export function TimelinePanel() {
         <button className="btn sm" onClick={handlePlay} title={t('tl_play')}>▶</button>
         <button className="btn sm" onClick={handlePause} title={t('tl_pause')}>⏸</button>
         <button className="btn sm" onClick={handleStop} title={t('tl_stop')}>■</button>
-        <button className={`btn sm ${autoCycle ? 'active' : ''}`} onClick={handleToggleCycle} title={t('tl_cycle')} style={{ color: autoCycle ? 'var(--acc)' : undefined }}>↺</button>
+        <button className={'btn sm' + (autoCycle ? ' active' : '')} onClick={handleToggleCycle} title={t('tl_cycle')}>↺</button>
       </div>
-      <div
-        ref={trackRef}
-        className="timeline-tracks"
+      <div ref={trackRef} className="timeline-tracks"
         onClick={handleSeek}
-        style={{ position: 'relative', flex: 1, height: tracks.length > 0 ? `${12 + tracks.length * 14}px` : 24, cursor: 'pointer', minHeight: 24, background: 'var(--bg0)', borderRadius: 3, overflow: 'hidden' }}
+        style={{ height: tracks.length > 0 ? `${12 + tracks.length * 14}px` : 24, minHeight: 24 }}
       >
         {tracks.map(t => (
-          <div key={t.uid} style={{
-            position: 'absolute',
-            left: `${t.start * 100}%`,
-            width: `${Math.max(t.dur * 100, 2)}%`,
-            top: `${4 + t.idx * 14}px`,
-            height: 10,
-            borderRadius: 3,
-            background: t.color,
-            opacity: 0.7,
-            display: 'flex',
-            alignItems: 'center',
-            paddingLeft: 4,
-            fontSize: 8,
-            color: '#fff',
-            overflow: 'hidden',
-            whiteSpace: 'nowrap',
-            textShadow: '0 0 2px rgba(0,0,0,0.8)',
-            minWidth: 4,
-          }}>
+          <div key={t.uid} className="timeline-track-bar"
+            style={{
+              left: `${t.start * 100}%`,
+              width: `${Math.max(t.dur * 100, 2)}%`,
+              top: `${4 + t.idx * 14}px`,
+              height: 10,
+              background: t.color,
+              opacity: 0.7,
+            }}
+          >
             {t.name.length * 4 < t.dur * 100 && t.name}
           </div>
         ))}
-        <div style={{
-          position: 'absolute',
-          left: `${normalized * 100}%`,
-          top: 0,
-          width: 2,
-          height: '100%',
-          background: 'var(--acc)',
-          pointerEvents: 'none',
-          transition: playing ? 'none' : 'left 0.1s ease',
-          boxShadow: '0 0 4px var(--acc)',
-        }} />
+        <div className="timeline-playhead" style={{ left: `${normalized * 100}%` }} />
       </div>
-      <span className="timeline-time" style={{ fontSize: 9, minWidth: 38, textAlign: 'right' }}>{globalTime.toFixed(2)}s</span>
-      <input type="range" className="timeline-slider" min="0" max="1000" value={Math.round(normalized * 1000)} onChange={handleSliderChange} style={{ width: 60 }} />
-      <span className="timeline-duration" style={{ fontSize: 9, minWidth: 38 }}>{maxDuration.toFixed(2)}s</span>
+      <span className="timeline-time">{globalTime.toFixed(2)}s</span>
+      <input type="range" className="timeline-slider" min="0" max="1000"
+        value={Math.round(normalized * 1000)} onChange={handleSliderChange}
+      />
+      <span className="timeline-duration">{maxDuration.toFixed(2)}s</span>
       <div className="timeline-export">
         <button className="btn sm" onClick={handleExportMSE} title={t('tl_export_mse')}>.mse</button>
         <button className="btn sm" onClick={handleExportEFF} title={t('tl_export_eff')}>.eff</button>

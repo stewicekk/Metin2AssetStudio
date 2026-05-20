@@ -10,15 +10,15 @@ export function ValidationPanel() {
   const issues = useMemo(() => validateProject(emitters, importedEffects), [emitters, importedEffects]);
 
   return (
-    <div className="studio-card validation-panel">
-      <div className="studio-card__header">
-        <span>{t('val_title')}</span>
-        <span className="muted">{issues.length} {t('vp_checks')}</span>
-      </div>
+    <div className="validation-panel">
+      <div className="panel-title">{t('val_title')} <span className="count">{issues.length} {t('vp_checks')}</span></div>
       <div className="validation-list">
         {issues.map((issue, index) => (
-          <div className={`validation-row validation-row--${issue.severity}`} key={`${issue.message}:${index}`}>{issue.message}</div>
+          <div className={'validation-row validation-row--' + issue.severity} key={`${issue.message}:${index}`}>{issue.message}</div>
         ))}
+        {issues.length === 0 && (
+          <div className="validation-row validation-row--success">{t('val_no_issues')}</div>
+        )}
       </div>
     </div>
   );
