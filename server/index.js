@@ -8,7 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT = path.resolve(__dirname, '..');
 const DIST = path.join(ROOT, 'frontend', 'dist');
-const ANALYZE_MSE = path.join(ROOT, 'frontend', 'public', 'analyze-mse');
+const ANALYZE_MSE = path.join(ROOT, 'frontend', 'fixtures');
 
 const app = express();
 const PORT = process.env.PORT || 3000;

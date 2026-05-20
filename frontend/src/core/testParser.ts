@@ -7,7 +7,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Cesta k testovacímu souboru - opravená cesta o úroveň výš
-const testFilePath = path.join(__dirname, '../../../analyze-mse/10kwaesok.mse');
+const testFilePath = path.join(__dirname, '../../../fixtures/10kwaesok.mse');
 
 try {
   const content = fs.readFileSync(testFilePath, 'utf-8');
@@ -20,8 +20,8 @@ try {
   console.log('Exportovaná délka:', exported.length);
 
   // Uložíme export pro kontrolu
-  fs.writeFileSync(path.join(__dirname, '../../../analyze-mse/10kwaesok_exported.mse'), exported);
-  console.log('Export uložen do: analyze-mse/10kwaesok_exported.mse');
+  fs.writeFileSync(path.join(__dirname, '../../../fixtures/10kwaesok_exported.mse'), exported);
+  console.log('Export uložen do: fixtures/10kwaesok_exported.mse');
   
   // Základní porovnání struktur (jednoduchá kontrola obsahu)
   if (data.groups.length > 0) {

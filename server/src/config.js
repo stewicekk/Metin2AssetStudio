@@ -13,7 +13,7 @@ export const config = {
   paths: {
     root: ROOT,
     dist: path.resolve(ROOT, '..', 'frontend', 'dist'),
-    analyzeMse: path.resolve(ROOT, '..', 'frontend', 'public', 'analyze-mse'),
+    analyzeMse: path.resolve(ROOT, '..', 'frontend', 'fixtures'),
     projects: path.resolve(ROOT, 'projects'),
     logs: path.resolve(ROOT, 'logs'),
     server: ROOT,

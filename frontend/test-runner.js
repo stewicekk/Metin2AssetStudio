@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const analyzeDir = path.join(__dirname, 'public', 'analyze-mse');
+const analyzeDir = path.join(__dirname, 'fixtures');
 
 const files = fs.readdirSync(analyzeDir).filter(f => f.endsWith('.mse'));
 const results = { passed: 0, failed: 0, errors: [] };

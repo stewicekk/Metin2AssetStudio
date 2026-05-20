@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const analyzeDir = path.resolve(__dirname, '..', '..', 'public', 'analyze-mse');
+const analyzeDir = path.resolve(__dirname, '..', '..', 'fixtures');
 
 const FILES_TO_FUZZ = 100;
 const MUTATIONS_PER_FILE = 20;
