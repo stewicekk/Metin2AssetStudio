@@ -10,6 +10,8 @@ export const config = {
   host: process.env.HOST || '0.0.0.0',
   isDev: process.env.NODE_ENV !== 'production',
 
+  corsOrigins: (process.env.CORS_ORIGIN || 'http://localhost:5173,http://localhost:3000').split(',').map(s => s.trim()),
+
   paths: {
     root: ROOT,
     dist: path.resolve(ROOT, '..', 'frontend', 'dist'),
@@ -17,6 +19,7 @@ export const config = {
     projects: path.resolve(ROOT, 'projects'),
     logs: path.resolve(ROOT, 'logs'),
     server: ROOT,
+    uploads: path.resolve(ROOT, 'projects', 'uploads'),
   },
 
   limits: {
@@ -25,6 +28,9 @@ export const config = {
     maxParticles: 8192,
     maxProjects: 100,
     maxExportSize: 10 * 1024 * 1024,
+    rateLimitWindow: parseInt(process.env.RATE_LIMIT_WINDOW || '900000', 10),
+    rateLimitMax: parseInt(process.env.RATE_LIMIT_MAX || '100', 10),
+    uploadMaxSize: parseInt(process.env.UPLOAD_MAX_SIZE || '10485760', 10),
   },
 
   features: {

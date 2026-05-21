@@ -313,53 +313,63 @@ export class ParticleRenderer {
     const rot = runtime.geometry.getAttribute('aRot') as THREE.BufferAttribute;
 
     const emitter = runtime.emitter;
-    let minIdx = runtime.maxParticles;
-    let maxIdx = -1;
+    const camPos = this.cameraController?.camera?.position;
+    const sx = camPos?.x ?? 0;
+    const sy = camPos?.y ?? 5;
+    const sz = camPos?.z ?? 10;
 
-    runtime.particles.forEach((particle, index) => {
-      const i3 = index * 3;
-      if (!particle.alive) {
-        pos.array[i3] = 99999;
-        pos.array[i3 + 1] = 99999;
-        pos.array[i3 + 2] = 99999;
-        size.array[index] = 0;
-        alpha.array[index] = 0;
-      } else {
-        const t = particle.age / particle.life;
-        let sizeBase = particle.baseSize * sampleCurve(emitter.sizeCurve, t) * 14;
-        if (emitter.velStretch > 0) {
-          const vMag = Math.sqrt(particle.vx * particle.vx + particle.vy * particle.vy + particle.vz * particle.vz);
-          sizeBase += vMag * emitter.velStretch * 14;
-        }
-        pos.array[i3] = particle.px;
-        pos.array[i3 + 1] = particle.py;
-        pos.array[i3 + 2] = particle.pz;
-        size.array[index] = sizeBase;
-        color.array[i3] = particle.col.r;
-        color.array[i3 + 1] = particle.col.g;
-        color.array[i3 + 2] = particle.col.b;
-        alpha.array[index] = clamp(sampleCurve(emitter.alphaCurve, t) * particle.col.a, 0, 1);
-        frame.array[index] = particle.frame;
-        const finalRot = particle.stretch > 0 ? particle.stretchRot : particle.rot;
-        rot.array[index] = finalRot;
+    const alive: { idx: number; dist: number }[] = [];
+    runtime.particles.forEach((p, i) => {
+      if (p.alive) {
+        const dx = p.px - sx;
+        const dy = p.py - sy;
+        const dz = p.pz - sz;
+        alive.push({ idx: i, dist: dx * dx + dy * dy + dz * dz });
       }
-
-      if (index < minIdx) minIdx = index;
-      if (index > maxIdx) maxIdx = index;
     });
+    alive.sort((a, b) => b.dist - a.dist);
 
-    if (minIdx > maxIdx) return;
+    const total = runtime.maxParticles;
+    let writeIdx = 0;
 
-    const count = maxIdx - minIdx + 1;
-    const needsFull = runtime.needsFullUpload;
-    runtime.needsFullUpload = false;
+    for (const entry of alive) {
+      const particle = runtime.particles[entry.idx];
+      const i3 = writeIdx * 3;
+      const t = particle.age / particle.life;
+      let sizeBase = particle.baseSize * sampleCurve(emitter.sizeCurve, t) * 14;
+      if (emitter.velStretch > 0) {
+        const vMag = Math.sqrt(particle.vx * particle.vx + particle.vy * particle.vy + particle.vz * particle.vz);
+        sizeBase += vMag * emitter.velStretch * 14;
+      }
+      pos.array[i3] = particle.px;
+      pos.array[i3 + 1] = particle.py;
+      pos.array[i3 + 2] = particle.pz;
+      size.array[writeIdx] = sizeBase;
+      color.array[i3] = particle.col.r;
+      color.array[i3 + 1] = particle.col.g;
+      color.array[i3 + 2] = particle.col.b;
+      alpha.array[writeIdx] = clamp(sampleCurve(emitter.alphaCurve, t) * particle.col.a, 0, 1);
+      frame.array[writeIdx] = particle.frame;
+      const finalRot = particle.stretch > 0 ? particle.stretchRot : particle.rot;
+      rot.array[writeIdx] = finalRot;
+      writeIdx++;
+    }
 
-    this.uploadAttr(pos, minIdx * 3, count * 3, needsFull);
-    this.uploadAttr(size, minIdx, count, needsFull);
-    this.uploadAttr(alpha, minIdx, count, needsFull);
-    this.uploadAttr(frame, minIdx, count, needsFull);
-    this.uploadAttr(rot, minIdx, count, needsFull);
-    this.uploadAttr(color, minIdx * 3, count * 3, needsFull);
+    for (let i = writeIdx; i < total; i++) {
+      const i3 = i * 3;
+      pos.array[i3] = 99999;
+      pos.array[i3 + 1] = 99999;
+      pos.array[i3 + 2] = 99999;
+      size.array[i] = 0;
+      alpha.array[i] = 0;
+    }
+
+    this.uploadAttr(pos, 0, total * 3, true);
+    this.uploadAttr(size, 0, total, true);
+    this.uploadAttr(alpha, 0, total, true);
+    this.uploadAttr(frame, 0, total, true);
+    this.uploadAttr(rot, 0, total, true);
+    this.uploadAttr(color, 0, total * 3, true);
   }
 
   private uploadAttr(attr: THREE.BufferAttribute, offset: number, count: number, forceFull: boolean): void {

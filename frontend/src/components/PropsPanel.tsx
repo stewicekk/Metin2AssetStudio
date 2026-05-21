@@ -244,6 +244,7 @@ function CurveEditor({ type, label, emitter, updateEmitter }: {
 }) {
   const { t } = useT();
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const dragRef = useRef<{ idx: number; ox: number; oy: number } | null>(null);
   const curve = emitter[type] as { t: number; v: number }[] | undefined;
   if (!curve) return null;
 
@@ -279,6 +280,78 @@ function CurveEditor({ type, label, emitter, updateEmitter }: {
     if (curve.length <= 2) return;
     const newCurve = curve.filter((_, i) => i !== idx);
     updateEmitter(emitter.uid, { [type]: newCurve });
+  };
+
+  const canvasToCurve = (clientX: number, clientY: number) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return { t: 0, v: 0 };
+    const rect = canvas.getBoundingClientRect();
+    const pad = 4;
+    const w = canvas.width;
+    const h = canvas.height;
+    const drawW = w - pad * 2;
+    const drawH = h - pad * 2;
+    const mx = (clientX - rect.left) / rect.width;
+    const my = (clientY - rect.top) / rect.height;
+    return {
+      t: Math.min(1, Math.max(0, (mx * w - pad) / drawW)),
+      v: Math.min(1.5, Math.max(0, 1 - (my * h - pad) / drawH)),
+    };
+  };
+
+  const findNearestPoint = (clientX: number, clientY: number): number => {
+    const canvas = canvasRef.current;
+    if (!canvas) return -1;
+    const rect = canvas.getBoundingClientRect();
+    const pad = 4;
+    const w = canvas.width;
+    const h = canvas.height;
+    const drawW = w - pad * 2;
+    const drawH = h - pad * 2;
+    const threshold = 12;
+
+    for (let i = 0; i < curve.length; i++) {
+      const cx = rect.left + (pad + curve[i].t * drawW) / w * rect.width;
+      const cy = rect.top + (pad + drawH - Math.min(2, Math.max(0, curve[i].v)) * drawH) / h * rect.height;
+      const dx = clientX - cx;
+      const dy = clientY - cy;
+      if (dx * dx + dy * dy < threshold * threshold) return i;
+    }
+    return -1;
+  };
+
+  const handleCanvasDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    const idx = findNearestPoint(e.clientX, e.clientY);
+    if (idx >= 0) {
+      dragRef.current = { idx, ox: e.clientX, oy: e.clientY };
+      (e.target as HTMLCanvasElement).setPointerCapture(e.pointerId);
+      return;
+    }
+    const cv = canvasToCurve(e.clientX, e.clientY);
+    const newCurve = [...curve, { t: Math.min(1, Math.max(0, cv.t)), v: Math.min(1.5, Math.max(0, cv.v)) }];
+    newCurve.sort((a, b) => a.t - b.t);
+    updateEmitter(emitter.uid, { [type]: newCurve });
+  };
+
+  const handleCanvasMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (!dragRef.current) return;
+    const cv = canvasToCurve(e.clientX, e.clientY);
+    const idx = dragRef.current.idx;
+    const newCurve = [...curve];
+    newCurve[idx] = { t: Math.min(1, Math.max(0, cv.t)), v: Math.min(1.5, Math.max(0, cv.v)) };
+    newCurve.sort((a, b) => a.t - b.t);
+    const movedIdx = newCurve.findIndex(p => p === newCurve[idx]);
+    dragRef.current.idx = movedIdx >= 0 ? movedIdx : idx;
+    updateEmitter(emitter.uid, { [type]: newCurve });
+  };
+
+  const handleCanvasUp = () => { dragRef.current = null; };
+
+  const handleCanvasDblClick = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    const idx = findNearestPoint(e.clientX, e.clientY);
+    if (idx >= 0 && curve.length > 2) {
+      handleRemovePoint(idx);
+    }
   };
 
   useEffect(() => {
@@ -350,14 +423,23 @@ function CurveEditor({ type, label, emitter, updateEmitter }: {
         <span className="curve-lbl">{label}</span>
       </div>
       <div className="curve-canvas-container">
-        <canvas ref={canvasRef} className="curve-canvas" width={260} height={60} />
+        <canvas
+          ref={canvasRef}
+          className="curve-canvas"
+          width={260} height={60}
+          onPointerDown={handleCanvasDown}
+          onPointerMove={handleCanvasMove}
+          onPointerUp={handleCanvasUp}
+          onDoubleClick={handleCanvasDblClick}
+          style={{ cursor: dragRef.current ? 'grabbing' : 'crosshair' }}
+        />
       </div>
       <div className="curve-points">
         {curve.map((pt, idx) => (
           <div key={idx} className="curve-point-row">
             <input type="number" value={pt.t} step={0.01} min={0} max={1} onChange={(e) => handlePointChange(idx, 't', e.target.value)} className="n40" />
             <input type="number" value={pt.v} step={0.01} onChange={(e) => handlePointChange(idx, 'v', e.target.value)} className="n40" />
-            <button className="btn sm curve-btn-rm" onClick={() => handleRemovePoint(idx)} disabled={curve.length <= 2}>✕</button>
+            <button className="btn sm curve-btn-rm" onClick={() => handleRemovePoint(idx)} disabled={curve.length <= 2}>{t('btn_remove_short')}</button>
           </div>
         ))}
       </div>

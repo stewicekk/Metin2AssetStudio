@@ -5,8 +5,8 @@ services:
     region: frankfurt
     plan: free
     buildCommand: cd frontend && npm install && npm run build && cd ../server && npm install
-    startCommand: cd server && node src/index.js
-    healthCheckPath: /api/health
+    startCommand: cd server && npm start
+    healthCheckPath: /api/fixtures
     envVars:
       - key: NODE_ENV
         value: production

@@ -32,6 +32,8 @@ export interface Dict {
   btn_stop: string;
   btn_autocycle: string;
   btn_fill: string;
+  btn_screenshot: string;
+  btn_fullscreen: string;
   btn_cycle_on: string;
   btn_cycle_off: string;
   btn_reset_camera: string;
@@ -43,6 +45,7 @@ export interface Dict {
   btn_copy: string;
   btn_download: string;
   btn_close: string;
+  btn_remove_short: string;
 
   // Viewport
   vp_fps: string;
@@ -75,6 +78,14 @@ export interface Dict {
   scene_bloom_label: string;
   scene_floor: string;
   scene_floor_label: string;
+  scene_gizmo: string;
+  scene_gizmo_mode: string;
+  scene_gizmo_translate: string;
+  scene_gizmo_rotate: string;
+  scene_gizmo_scale: string;
+  scene_gizmo_x: string;
+  scene_gizmo_y: string;
+  scene_gizmo_z: string;
   scene_scale: string;
   scene_particle_debug: string;
   scene_auto_play: string;
@@ -177,6 +188,7 @@ export interface Dict {
   prof_vram: string;
   prof_draw_calls: string;
   prof_triangles: string;
+  prof_chart: string;
 
   // Settings
   set_theme: string;
@@ -223,6 +235,19 @@ export interface Dict {
   el_paste: string;
   el_visible_on: string;
   el_visible_off: string;
+  el_search_placeholder: string;
+  el_duplicate_short: string;
+  el_delete_short: string;
+  el_randomize_short: string;
+  el_copy_short: string;
+  el_paste_short: string;
+  el_batch_dup: string;
+  el_batch_del: string;
+  el_batch_show: string;
+  el_batch_hide: string;
+  el_group: string;
+  el_ungroup: string;
+  el_group_placeholder: string;
 
   // ValidationPanel
   vp_checks: string;

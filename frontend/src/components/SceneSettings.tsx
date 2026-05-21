@@ -29,6 +29,12 @@ export function SceneSettings() {
   const setEnvBloom = useAppStore(s => s.setEnvBloom);
   const envFloor = useAppStore(s => s.envFloor);
   const setEnvFloor = useAppStore(s => s.setEnvFloor);
+  const gizmoEnabled = useAppStore(s => s.gizmoEnabled);
+  const setGizmoEnabled = useAppStore(s => s.setGizmoEnabled);
+  const gizmoMode = useAppStore(s => s.gizmoMode);
+  const setGizmoMode = useAppStore(s => s.setGizmoMode);
+  const gizmoTarget = useAppStore(s => s.gizmoTarget);
+  const setGizmoTarget = useAppStore(s => s.setGizmoTarget);
 
   const applyTheme = (theme: string) => {
     setSettings({ theme });
@@ -114,6 +120,39 @@ export function SceneSettings() {
             <input type="checkbox" checked={envFloor} onChange={e => setEnvFloor(e.target.checked)} />
             <span className="hint">{t('scene_floor_label')}</span>
           </div>
+          <div className="sep" />
+          <div className="row">
+            <label className="lbl w80">{t('scene_gizmo')}</label>
+            <div className={'tsw' + (gizmoEnabled ? ' on' : '')}
+              onClick={() => setGizmoEnabled(!gizmoEnabled)} />
+          </div>
+          {gizmoEnabled && (
+            <>
+              <div className="row">
+                <label className="lbl w80">{t('scene_gizmo_mode')}</label>
+                <select value={gizmoMode} onChange={e => setGizmoMode(e.target.value as any)}>
+                  <option value="translate">{t('scene_gizmo_translate')}</option>
+                  <option value="rotate">{t('scene_gizmo_rotate')}</option>
+                  <option value="scale">{t('scene_gizmo_scale')}</option>
+                </select>
+              </div>
+              <div className="row">
+                <label className="lbl w80">{t('scene_gizmo_x')}</label>
+                <input type="number" step={0.1} value={gizmoTarget.x}
+                  onChange={e => setGizmoTarget({ ...gizmoTarget, x: parseFloat(e.target.value) || 0 })} />
+              </div>
+              <div className="row">
+                <label className="lbl w80">{t('scene_gizmo_y')}</label>
+                <input type="number" step={0.1} value={gizmoTarget.y}
+                  onChange={e => setGizmoTarget({ ...gizmoTarget, y: parseFloat(e.target.value) || 0 })} />
+              </div>
+              <div className="row">
+                <label className="lbl w80">{t('scene_gizmo_z')}</label>
+                <input type="number" step={0.1} value={gizmoTarget.z}
+                  onChange={e => setGizmoTarget({ ...gizmoTarget, z: parseFloat(e.target.value) || 0 })} />
+              </div>
+            </>
+          )}
         </div>
       </div>
 

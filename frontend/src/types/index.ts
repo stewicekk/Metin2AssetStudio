@@ -44,6 +44,7 @@ export interface Emitter {
   name: string;
   visible: boolean;
   color: string;
+  group?: string;
 
   blend: BlendType;
   shape: ShapeType;

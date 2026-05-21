@@ -31,6 +31,15 @@ const defaultSnapshot: ProfilingSnapshot = {
 };
 
 let current: ProfilingSnapshot = { ...defaultSnapshot };
+
+export const fpsHistory: number[] = [];
+const MAX_FPS_HISTORY = 120;
+export function pushFps(value: number): void {
+  fpsHistory.push(value);
+  if (fpsHistory.length > MAX_FPS_HISTORY) {
+    fpsHistory.shift();
+  }
+}
 let listeners: Array<(s: ProfilingSnapshot) => void> = [];
 
 export const profilingStore = {

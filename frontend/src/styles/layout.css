@@ -75,6 +75,20 @@ body{
 .emit-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;transition:transform .15s,box-shadow .15s;}
 .emit-dot:hover{transform:scale(1.5);cursor:pointer;box-shadow:0 0 6px var(--glow);}
 .emit-name{font-size:11px;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.emitter-search{padding:4px 8px;background:var(--bg0);border-bottom:1px solid var(--border);}
+.search-input{width:100%;padding:4px 8px;border-radius:4px;border:1px solid var(--border);background:var(--bg2);color:var(--text);font-size:11px;font-family:inherit;outline:none;transition:border-color .15s;}
+.search-input:focus{border-color:var(--acc);}
+.emit-chk{width:12px;height:12px;cursor:pointer;accent-color:var(--acc);flex-shrink:0;}
+.emitter-row.batch-sel{background:rgba(200,155,60,.08);border-left-color:var(--acc);}
+.batch-count{font-size:10px;color:var(--acc);font-weight:600;padding:0 2px;}
+.emitter-group-hdr{display:flex;align-items:center;gap:6px;padding:3px 8px;background:var(--bg0);border-bottom:1px solid var(--border);user-select:none;font-size:10px;}
+.emitter-group-arrow{cursor:pointer;color:var(--text3);font-size:9px;flex-shrink:0;width:12px;text-align:center;}
+.emitter-group-arrow:hover{color:var(--acc);}
+.emitter-group-name{color:var(--acc);font-weight:600;cursor:pointer;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.emitter-group-name:hover{opacity:.8;}
+.emitter-group-count{font-size:9px;color:var(--text3);flex-shrink:0;}
+.emitter-group-inline{display:inline-flex;gap:2px;align-items:center;}
+.emitter-group-input{width:90px;padding:2px 4px;font-size:9px;}
 
 /* ══════════════════════════════════════════════════════════════
    PANEL STYLES
@@ -349,6 +363,7 @@ input[readonly]{opacity:.7;cursor:default;}
 .badge.alp{background:rgba(80,150,200,.12);color:var(--blue);border:1px solid rgba(80,150,200,.15);}
 .badge.mod{background:rgba(80,200,120,.12);color:var(--green);border:1px solid rgba(80,200,120,.15);}
 .tag{display:inline-block;font-size:8px;padding:1px 5px;border-radius:3px;background:rgba(200,155,60,.1);color:var(--acc);border:1px solid rgba(200,155,60,.15);font-weight:500;}
+.badge.group{background:rgba(120,100,200,.12);color:var(--purple);border:1px solid rgba(120,100,200,.15);margin-right:2px;}
 
 /* ══════════════════════════════════════════════════════════════
    PANEL TITLE (shared across right-side panels)
@@ -465,15 +480,14 @@ input[readonly]{opacity:.7;cursor:default;}
 .dbg-info{font-size:9px;padding:2px 5px;border-radius:var(--radius-sm);margin-bottom:2px;background:rgba(80,160,224,.08);color:var(--blue);border-left:2px solid var(--blue);}
 
 /* ══════════════════════════════════════════════════════════════
-   MINIMAP
-   ══════════════════════════════════════════════════════════════ */
-#minimap{
-  background:var(--bg0);border:1px solid var(--border);border-radius:2px;
-  margin:4px 6px;padding:3px;position:relative;overflow:hidden;
-  min-height:20px;max-height:48px;cursor:pointer;
+    MINIMAP
+    ══════════════════════════════════════════════════════════════ */
+.minimap-wrap{
+  position:absolute;bottom:8px;right:8px;z-index:10;
+  border:1px solid var(--border);border-radius:4px;overflow:hidden;
+  box-shadow:0 2px 8px rgba(0,0,0,.4);pointer-events:none;
 }
-.minimap-dot{position:absolute;height:4px;border-radius:1px;opacity:.6;transition:opacity .15s;}
-.minimap-dot:hover,.minimap-dot.active{opacity:1;}
+.minimap-wrap canvas{display:block;}
 
 /* ══════════════════════════════════════════════════════════════
    ADVANCED SECTION
@@ -494,6 +508,8 @@ input[readonly]{opacity:.7;cursor:default;}
 .prof-val{color:var(--acc);font-family:var(--font-mono);font-weight:600;}
 .prof-bottlenecks{display:flex;flex-direction:column;gap:1px;margin-top:2px;}
 .prof-bottleneck{font-size:8px;padding:1px 4px;background:rgba(224,80,80,.15);color:var(--red);border-left:2px solid var(--red);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.perf-chart{margin-top:8px;}
+.perf-chart canvas{border-radius:2px;display:block;width:100%;max-width:240px;height:60px;}
 
 /* ══════════════════════════════════════════════════════════════
    ANIMATIONS

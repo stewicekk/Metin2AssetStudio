@@ -30,6 +30,9 @@ interface ProjectData {
     envBloom: boolean;
     envFloor: boolean;
     envCharVisible: boolean;
+    gizmoEnabled: boolean;
+    gizmoTarget: { x: number; y: number; z: number };
+    gizmoMode: string;
   };
 }
 
@@ -73,6 +76,10 @@ interface AppState {
   envFloor: boolean;
   envCharVisible: boolean;
 
+  gizmoEnabled: boolean;
+  gizmoTarget: { x: number; y: number; z: number };
+  gizmoMode: 'translate' | 'rotate' | 'scale';
+
   setSettings: (newSettings: Partial<AppSettings>) => void;
   resetProject: () => void;
   addEmitter: (name?: string) => void;
@@ -85,6 +92,8 @@ interface AppState {
   selectEffect: (id: number | null) => void;
   applyPreset: (emitterId: number, presetEffect: { e: Partial<Emitter> }) => void;
   updateEmitter: (id: number, updates: Partial<Emitter>) => void;
+  batchGroupEmitters: (ids: number[], groupName: string) => void;
+  setGroup: (id: number, groupName: string) => void;
   batchUpdateEmitters: (updates: Array<{ id: number; updates: Partial<Emitter> }>) => void;
   setPlaying: (value: boolean) => void;
   setGlobalTime: (time: number) => void;
@@ -115,6 +124,9 @@ interface AppState {
   setEnvBloom: (v: boolean) => void;
   setEnvFloor: (v: boolean) => void;
   setEnvCharVisible: (v: boolean) => void;
+  setGizmoEnabled: (v: boolean) => void;
+  setGizmoTarget: (v: { x: number; y: number; z: number }) => void;
+  setGizmoMode: (v: 'translate' | 'rotate' | 'scale') => void;
   setAutoCycleTimer: (v: number) => void;
   exportProjectToJSON: () => string;
   importProjectFromJSON: (json: string) => boolean;
@@ -218,6 +230,9 @@ function debouncedAutoSave(get: () => AppState): void {
           envBloom: state.envBloom,
           envFloor: state.envFloor,
           envCharVisible: state.envCharVisible,
+          gizmoEnabled: state.gizmoEnabled,
+          gizmoTarget: state.gizmoTarget,
+          gizmoMode: state.gizmoMode,
         },
       };
       localStorage.setItem('metin2_asset_studio_autosave', JSON.stringify(projectData));
@@ -279,6 +294,9 @@ export const useAppStore = create<AppState>((set, get) => ({
   envBloom: false,
   envFloor: false,
   envCharVisible: false,
+  gizmoEnabled: false,
+  gizmoTarget: { x: 0, y: 1, z: 0 },
+  gizmoMode: 'translate',
 
   setSettings: (newSettings) => {
     if (newSettings.language && newSettings.language !== get().settings.language) {
@@ -451,6 +469,30 @@ export const useAppStore = create<AppState>((set, get) => ({
     debouncedAutoSave(get);
   },
 
+  batchGroupEmitters: (ids, groupName) => {
+    get()._pushHistory();
+    set((state) => ({
+      emitters: state.emitters.map(e =>
+        ids.includes(e.uid) ? { ...e, group: groupName || undefined, _dirty: true } : e
+      ),
+    }));
+    debouncedAutoSave(get);
+  },
+
+  setGroup: (id, groupName) => {
+    const state = get();
+    const now = performance.now();
+    if (now - state._lastHistoryTime > LAZY_HISTORY_THRESHOLD_MS) {
+      state._pushHistory();
+    }
+    set((s) => ({
+      emitters: s.emitters.map(e =>
+        e.uid === id ? { ...e, group: groupName || undefined, _dirty: true } : e
+      ),
+    }));
+    debouncedAutoSave(get);
+  },
+
   batchUpdateEmitters: (updates) => {
     const state = get();
     state._pushHistory();
@@ -487,6 +529,9 @@ export const useAppStore = create<AppState>((set, get) => ({
   setEnvBloom: (v) => set({ envBloom: v }),
   setEnvFloor: (v) => set({ envFloor: v }),
   setEnvCharVisible: (v) => set({ envCharVisible: v }),
+  setGizmoEnabled: (v) => set({ gizmoEnabled: v }),
+  setGizmoTarget: (v) => set({ gizmoTarget: v }),
+  setGizmoMode: (v) => set({ gizmoMode: v }),
   setAutoCycleTimer: (v) => set({ autoCycleTimer: v }),
 
   moveEmitterUp: (id) => {
@@ -565,6 +610,9 @@ export const useAppStore = create<AppState>((set, get) => ({
         envBloom: state.envBloom,
         envFloor: state.envFloor,
         envCharVisible: state.envCharVisible,
+        gizmoEnabled: state.gizmoEnabled,
+        gizmoTarget: state.gizmoTarget,
+        gizmoMode: state.gizmoMode,
       },
     };
     return JSON.stringify(projectData, null, 2);
@@ -596,6 +644,9 @@ export const useAppStore = create<AppState>((set, get) => ({
         envBloom: data.scene?.envBloom ?? false,
         envFloor: data.scene?.envFloor ?? false,
         envCharVisible: data.scene?.envCharVisible ?? false,
+        gizmoEnabled: data.scene?.gizmoEnabled ?? false,
+        gizmoTarget: data.scene?.gizmoTarget ?? { x: 0, y: 1, z: 0 },
+        gizmoMode: (data.scene?.gizmoMode as 'translate' | 'rotate' | 'scale') ?? 'translate',
         activeEmitterId: data.emitters[0]?.uid ?? null,
         globalTime: 0,
         playing: false,
@@ -674,6 +725,9 @@ export const useAppStore = create<AppState>((set, get) => ({
           envBloom: state.envBloom,
           envFloor: state.envFloor,
           envCharVisible: state.envCharVisible,
+          gizmoEnabled: state.gizmoEnabled,
+          gizmoTarget: state.gizmoTarget,
+          gizmoMode: state.gizmoMode,
         },
       };
       localStorage.setItem('metin2_asset_studio_autosave', JSON.stringify(projectData));

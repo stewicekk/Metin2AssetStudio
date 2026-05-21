@@ -1,4 +1,5 @@
 export { CameraController } from './CameraController';
+export { GizmoLayer } from './GizmoLayer';
 export { MeshParticleRenderer } from './MeshParticleRenderer';
 export { ParticleDebugger } from './ParticleDebugger';
 export { ParticleRenderer } from './ParticleRenderer';

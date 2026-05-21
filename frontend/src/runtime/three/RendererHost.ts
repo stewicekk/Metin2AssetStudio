@@ -1,10 +1,15 @@
 import * as THREE from 'three';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import { useAppStore } from '../../store/useAppStore';
 import { ParticleRenderer } from './ParticleRenderer';
 import { TextureRegistry } from './TextureRegistry';
 import { CameraController } from './CameraController';
+import { GizmoLayer } from './GizmoLayer';
 import { RendererProfiler } from './RendererProfiler';
-import { profilingStore } from './ProfilingStore';
+import { profilingStore, pushFps } from './ProfilingStore';
 import { t } from '../../i18n';
 
 function hexToRgb(hex: string) {
@@ -42,9 +47,13 @@ export class RendererHost {
   private resizeObserver: ResizeObserver | null = null;
   private readonly mount: HTMLElement;
   private readonly overlay: { fps: HTMLElement | null; info: HTMLElement | null; perf: HTMLElement | null };
+  private readonly gizmo: GizmoLayer | null = null;
   private readonly profiler = new RendererProfiler();
   private profilerDisplayTimer = 0;
   private resizeTimer: ReturnType<typeof setTimeout> | null = null;
+  private bloomComposer: EffectComposer | null = null;
+  private bloomPass: UnrealBloomPass | null = null;
+  private screenshotRequested = false;
 
   constructor(mount: HTMLElement, overlay: { fps: HTMLElement | null; info: HTMLElement | null; perf: HTMLElement | null }) {
     this.mount = mount;
@@ -62,7 +71,17 @@ export class RendererHost {
     this.mount.appendChild(this.renderer.domElement);
     this.setupContextLossHandling();
 
+    this.bloomComposer = new EffectComposer(this.renderer);
+    this.bloomComposer.addPass(new RenderPass(this.scene, this.camera));
+    this.bloomPass = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.3, 0.1, 0.05);
+    this.bloomComposer.addPass(this.bloomPass);
+    const outputPass = new OutputPass();
+    this.bloomComposer.addPass(outputPass);
+
     this.cameraController = new CameraController(this.camera, this.renderer.domElement);
+    this.gizmo = new GizmoLayer(this.camera, this.renderer.domElement, this.scene, (pos) => {
+      useAppStore.getState().setGizmoTarget(pos);
+    });
     this.particles = new ParticleRenderer(this.scene, this.textures);
     this.particles.setCameraController(this.cameraController);
 
@@ -129,6 +148,17 @@ export class RendererHost {
   resetCamera(): void { this.cameraController.reset(); }
   setCameraView(view: 'front' | 'top' | 'persp'): void { this.cameraController.setView(view); }
 
+  getCameraInfo(): { position: { x: number; y: number; z: number }; target: { x: number; y: number; z: number } } {
+    const pos = this.camera.position;
+    const tgt = this.cameraController.getTarget();
+    return {
+      position: { x: pos.x, y: pos.y, z: pos.z },
+      target: { x: tgt.x, y: tgt.y, z: tgt.z },
+    };
+  }
+
+  requestScreenshot(): void { this.screenshotRequested = true; }
+
   dispose(): void {
     this.disposed = true;
     cancelAnimationFrame(this.frame);
@@ -137,10 +167,16 @@ export class RendererHost {
       this.resizeObserver.disconnect();
       this.resizeObserver = null;
     }
+    this.gizmo?.dispose();
     this.cameraController.dispose();
     this.particles.dispose();
     this.textures.dispose();
     this.disposeCharacter();
+    if (this.bloomComposer) {
+      this.bloomComposer.dispose();
+      this.bloomComposer = null;
+      this.bloomPass = null;
+    }
     this.renderer.dispose();
     this.renderer.domElement.remove();
   }
@@ -164,6 +200,9 @@ export class RendererHost {
     this.renderer.setSize(width, height);
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
+    if (this.bloomComposer) {
+      this.bloomComposer.setSize(width, height);
+    }
   };
 
   private readonly animate = (): void => {
@@ -222,8 +261,23 @@ export class RendererHost {
     this.profiler.mark('simulate');
     if (state.playing) state.setGlobalTime(state.globalTime + dt);
 
-    this.renderer.render(this.scene, this.camera);
+    if (state.gizmoEnabled && this.gizmo) {
+      this.gizmo.setTarget(new THREE.Vector3(state.gizmoTarget.x, state.gizmoTarget.y, state.gizmoTarget.z));
+      this.gizmo.setMode(state.gizmoMode);
+      this.gizmo.update();
+    }
+
+    if (state.envBloom && this.bloomComposer) {
+      this.bloomComposer.render();
+    } else {
+      this.renderer.render(this.scene, this.camera);
+    }
     this.profiler.mark('render');
+
+    if (this.screenshotRequested) {
+      this.screenshotRequested = false;
+      this.captureScreenshot();
+    }
 
     this.updateOverlay(alive);
     this.profiler.endFrame();
@@ -233,8 +287,10 @@ export class RendererHost {
       this.profilerDisplayTimer = 0;
       const stats = this.profiler.getStats();
       const marks = this.profiler.getMarks();
+      const fps = stats.avgFrameTime > 0 ? Math.round(1000 / stats.avgFrameTime) : 0;
+      pushFps(fps);
       profilingStore.update({
-        fps: stats.avgFrameTime > 0 ? Math.round(1000 / stats.avgFrameTime) : 0,
+        fps,
         totalMs: Math.round(stats.avgFrameTime * 10) / 10,
         simulateMs: Math.round((marks.simulate || 0) * 10) / 10,
         uploadMs: Math.round((marks.upload || 0) * 10) / 10,
@@ -259,28 +315,83 @@ export class RendererHost {
     }
   };
 
+  private captureScreenshot(): void {
+    this.renderer.render(this.scene, this.camera);
+    const canvas = this.renderer.domElement;
+    const link = document.createElement('a');
+    link.download = `${useAppStore.getState().exportEffectName}_screenshot.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  }
+
   private buildCharacter(): THREE.Group {
     const g = new THREE.Group();
-    const mat = (c: number) => new THREE.MeshBasicMaterial({ color: c, wireframe: true, opacity: 0.35, transparent: true });
-    const addMesh = (geo: THREE.BufferGeometry, pos: number[], rot: number[] | null, c?: number) => {
-      const m = new THREE.Mesh(geo, mat(c || 0x1a2a3a));
-      if (pos) m.position.set(pos[0], pos[1], pos[2]);
-      if (rot) { m.rotation.x = rot[0] || 0; m.rotation.z = rot[1] || 0; }
-      g.add(m);
-    };
-    addMesh(new THREE.CylinderGeometry(0.2, 0.17, 0.65, 8), [0, 1.12, 0], null);
-    addMesh(new THREE.CylinderGeometry(0.22, 0.2, 0.3, 8), [0, 1.5, 0], null);
-    addMesh(new THREE.SphereGeometry(0.17, 8, 6), [0, 1.72, 0], null);
-    addMesh(new THREE.CylinderGeometry(0.18, 0.15, 0.28, 8), [0, 0.78, 0], null);
-    addMesh(new THREE.CylinderGeometry(0.075, 0.065, 0.72, 6), [0.1, 0.4, 0], null);
-    addMesh(new THREE.CylinderGeometry(0.075, 0.065, 0.72, 6), [-0.1, 0.4, 0], null);
-    addMesh(new THREE.CylinderGeometry(0.065, 0.055, 0.68, 6), [0.11, -0.04, 0], null);
-    addMesh(new THREE.CylinderGeometry(0.065, 0.055, 0.68, 6), [-0.11, -0.04, 0], null);
-    addMesh(new THREE.CylinderGeometry(0.055, 0.05, 0.58, 6), [0.37, 1.3, 0], [0, 0.4]);
-    addMesh(new THREE.CylinderGeometry(0.055, 0.05, 0.58, 6), [-0.37, 1.3, 0], [0, -0.4]);
-    addMesh(new THREE.CylinderGeometry(0.05, 0.04, 0.5, 6), [0.56, 0.95, 0], [0, 0.3]);
-    addMesh(new THREE.CylinderGeometry(0.05, 0.04, 0.5, 6), [-0.56, 0.95, 0], [0, -0.3]);
-    addMesh(new THREE.CylinderGeometry(0.022, 0.018, 0.85, 6), [0.62, 0.75, 0], [0, 0.15], 0x2a3a4a);
+    const boneMat = (c: number, wire = true) => new THREE.MeshBasicMaterial({ color: c, wireframe: wire, opacity: wire ? 0.35 : 1, transparent: wire });
+
+    const bone: { name: string; pos: number[]; parent?: THREE.Group; rot?: number[] }[] = [
+      { name: 'Bip01_Pelvis', pos: [0, 1.0, 0] },
+      { name: 'Bip01_Spine', pos: [0, 0.25, 0] },
+      { name: 'Bip01_Spine1', pos: [0, 0.2, 0] },
+      { name: 'Bip01_Neck', pos: [0, 0.3, 0] },
+      { name: 'Bip01_Head', pos: [0, 0.22, 0] },
+    ];
+
+    const joints: THREE.Group[] = [];
+    bone.forEach((b, i) => {
+      const jg = new THREE.Group();
+      jg.userData.name = b.name;
+      const pos = b.pos;
+      jg.position.set(pos[0], pos[1], pos[2]);
+      if (b.rot) jg.rotation.set(b.rot[0], b.rot[1], b.rot[2]);
+      if (i === 0) g.add(jg);
+      else joints[i - 1].add(jg);
+      joints.push(jg);
+    });
+
+    const colors = [0x44aaff, 0x66bbff, 0x88ccff, 0xaaddff, 0xcceeff];
+    joints.forEach((jg, i) => {
+      const s = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 6), boneMat(colors[i % colors.length], false));
+      jg.add(s);
+    });
+
+    const armGeo = new THREE.CylinderGeometry(0.04, 0.03, 0.5, 6);
+    const legGeo = new THREE.CylinderGeometry(0.05, 0.04, 0.6, 6);
+    const forearmGeo = new THREE.CylinderGeometry(0.035, 0.025, 0.45, 6);
+
+    const leftArm = new THREE.Group(); leftArm.position.set(0.3, 0.1, 0); leftArm.rotation.z = -0.3; leftArm.rotation.x = 0.1;
+    joints[1]?.add(leftArm);
+    const laMesh = new THREE.Mesh(armGeo, boneMat(0x5599dd));
+    leftArm.add(laMesh);
+
+    const leftForearm = new THREE.Group(); leftForearm.position.set(0, -0.5, 0); leftForearm.rotation.x = 0.2;
+    leftArm.add(leftForearm);
+    const lfMesh = new THREE.Mesh(forearmGeo, boneMat(0x77aadd));
+    leftForearm.add(lfMesh);
+
+    const rightArm = new THREE.Group(); rightArm.position.set(-0.3, 0.1, 0); rightArm.rotation.z = 0.3; rightArm.rotation.x = -0.1;
+    joints[1]?.add(rightArm);
+    const raMesh = new THREE.Mesh(armGeo, boneMat(0x5599dd));
+    rightArm.add(raMesh);
+
+    const rightForearm = new THREE.Group(); rightForearm.position.set(0, -0.5, 0); rightForearm.rotation.x = -0.2;
+    rightArm.add(rightForearm);
+    const rfMesh = new THREE.Mesh(forearmGeo, boneMat(0x77aadd));
+    rightForearm.add(rfMesh);
+
+    const leftLeg = new THREE.Group(); leftLeg.position.set(0.15, -0.1, 0); leftLeg.rotation.z = 0.05;
+    joints[0]?.add(leftLeg);
+    const llMesh = new THREE.Mesh(legGeo, boneMat(0x4488bb));
+    leftLeg.add(llMesh);
+
+    const rightLeg = new THREE.Group(); rightLeg.position.set(-0.15, -0.1, 0); rightLeg.rotation.z = -0.05;
+    joints[0]?.add(rightLeg);
+    const rlMesh = new THREE.Mesh(legGeo, boneMat(0x4488bb));
+    rightLeg.add(rlMesh);
+
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.15, 10, 8), boneMat(0xeeddcc, false));
+    joints[4]?.add(head);
+    head.position.y = 0.15;
+
     return g;
   }
 

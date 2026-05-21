@@ -10,19 +10,21 @@ export class CameraController {
   private panning = false;
   private last = { x: 0, y: 0 };
 
-  private readonly camera: THREE.PerspectiveCamera;
+  private readonly _camera: THREE.PerspectiveCamera;
   private readonly element: HTMLElement;
   private readonly _v3 = new THREE.Vector3();
   private readonly _v3_2 = new THREE.Vector3();
 
   constructor(camera: THREE.PerspectiveCamera, element: HTMLElement) {
-    this.camera = camera;
+    this._camera = camera;
     this.element = element;
     this.update();
     this.bind();
   }
 
   get distance(): number { return this.radius; }
+  get camera(): THREE.PerspectiveCamera { return this._camera; }
+  getTarget(): THREE.Vector3 { return this.target.clone(); }
 
   dispose(): void {
     this.element.oncontextmenu = null;
@@ -67,7 +69,7 @@ export class CameraController {
       if (this.panning) {
         const dx = (event.clientX - this.last.x) * 0.004 * this.radius;
         const dy = (event.clientY - this.last.y) * 0.004 * this.radius;
-        const right = this._v3.crossVectors(this.camera.getWorldDirection(this._v3_2), new THREE.Vector3(0, 1, 0)).normalize();
+        const right = this._v3.crossVectors(this._camera.getWorldDirection(this._v3_2), new THREE.Vector3(0, 1, 0)).normalize();
         this.target.addScaledVector(right, -dx);
         this.target.y += dy;
         this.last = { x: event.clientX, y: event.clientY };
@@ -88,7 +90,7 @@ export class CameraController {
     const x = this.radius * Math.sin(this.theta) * Math.cos(this.phi);
     const y = this.radius * Math.cos(this.theta);
     const z = this.radius * Math.sin(this.theta) * Math.sin(this.phi);
-    this.camera.position.set(this.target.x + x, this.target.y + y, this.target.z + z);
-    this.camera.lookAt(this.target);
+    this._camera.position.set(this.target.x + x, this.target.y + y, this.target.z + z);
+    this._camera.lookAt(this.target);
   }
 }

@@ -39,7 +39,7 @@ function App() {
   const setVpScale = useAppStore(s => s.setVpScale);
   const autoCycle = useAppStore(s => s.autoCycle);
   const setAutoCycle = useAppStore(s => s.setAutoCycle);
-  const cameraControllerRef = useRef<{ reset: () => void; setView: (f: string) => void } | null>(null);
+  const cameraControllerRef = useRef<{ reset: () => void; setView: (f: string) => void; screenshot: () => void; fullscreen: () => void } | null>(null);
 
   const initialized = useRef(false);
   const mseInputRef = useRef<HTMLInputElement>(null);
@@ -335,7 +335,7 @@ function App() {
     toast(t('toast_deleted'), 'info');
   };
 
-  const cameraRefCallback = useCallback((ref: { reset: () => void; setView: (f: string) => void } | null) => {
+  const cameraRefCallback = useCallback((ref: { reset: () => void; setView: (f: string) => void; screenshot: () => void; fullscreen: () => void } | null) => {
     cameraControllerRef.current = ref;
   }, []);
 
@@ -396,6 +396,8 @@ function App() {
           <button className="btn sm" onClick={() => cameraControllerRef.current?.setView('front')} title={t('btn_front')}>{t('btn_front')}</button>
           <button className="btn sm" onClick={() => cameraControllerRef.current?.setView('top')} title={t('btn_top')}>{t('btn_top')}</button>
           <button className="btn sm" onClick={() => cameraControllerRef.current?.setView('persp')} title={t('btn_3d')}>{t('btn_3d')}</button>
+          <button className="btn sm" onClick={() => cameraControllerRef.current?.screenshot()} title={t('btn_screenshot')}>{t('btn_screenshot')}</button>
+          <button className="btn sm" onClick={() => cameraControllerRef.current?.fullscreen()} title={t('btn_fullscreen')}>{t('btn_fullscreen')}</button>
           <span className="sep-v" />
           <button className="btn sm accent" onClick={handleExportMDE} title={t('btn_mde')}>{t('btn_mde')}</button>
           <button className="btn sm" onClick={handleExportEFF} title={t('btn_eff')}>{t('btn_eff')}</button>

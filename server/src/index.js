@@ -1,5 +1,8 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import compression from 'compression';
+import rateLimit from 'express-rate-limit';
 import path from 'path';
 import fs from 'fs';
 import http from 'http';
@@ -11,13 +14,38 @@ import fixtureRoutes from './routes/fixtures.js';
 import projectRoutes from './routes/projects.js';
 import validateRoutes from './routes/validate.js';
 import exportRoutes from './routes/export.js';
+import uploadRoutes from './routes/upload.js';
 
 const app = express();
 const server = http.createServer(app);
 
-app.use(cors());
+// Security headers
+app.use(helmet());
+
+// CORS
+app.use(cors({
+  origin: config.corsOrigins,
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true,
+}));
+
+// Compression (after helmet, before route handlers)
+app.use(compression());
+
 app.use(express.json({ limit: config.limits.maxUploadSize }));
 app.use(express.static(config.paths.dist));
+
+// Rate limiters
+const apiLimiter = rateLimit({
+  windowMs: config.limits.rateLimitWindow,
+  max: config.limits.rateLimitMax,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => req.headers.upgrade === 'websocket' || req.path === '/api/upload',
+  message: { error: 'Too many requests, please try again later' },
+});
+
+app.use('/api/', apiLimiter);
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -30,10 +58,20 @@ app.use((req, res, next) => {
   next();
 });
 
+// Upload-specific rate limiter (stricter: 10 per 15 min)
+const uploadLimiter = rateLimit({
+  windowMs: config.limits.rateLimitWindow,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many upload requests, please try again later' },
+});
+
 app.use('/api/fixtures', fixtureRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/validate', validateRoutes);
 app.use('/api/export', exportRoutes);
+app.use('/api/upload', uploadLimiter, uploadRoutes);
 
 app.get('/api/stats', (req, res) => {
   const fixtureCount = fs.existsSync(config.paths.analyzeMse)
