@@ -42,3 +42,14 @@ release/
 # Temp
 temp/
 tmp/
+
+# C++ project build artifacts
+Metin2AssetStudioCpp/build/
+Metin2AssetStudioCpp/.vs/
+Metin2AssetStudioCpp/vcpkg_installed/
+Metin2AssetStudioCpp/CMakeCache.txt
+Metin2AssetStudioCpp/CMakeFiles/
+Metin2AssetStudioCpp/*.exe
+Metin2AssetStudioCpp/*.pdb
+Metin2AssetStudioCpp/*.obj
+Metin2AssetStudioCpp/*.lib

@@ -1,0 +1,10 @@
+{
+  "name": "metin2-asset-studio-cpp",
+  "version": "2.0.0",
+  "dependencies": [
+    "qt6",
+    "opengl",
+    "nlohmann-json",
+    "catch2"
+  ]
+}
