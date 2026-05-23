@@ -51,7 +51,7 @@ export function spawnParticle(runtime: RuntimeEmitter): void {
   slot.age = 0;
   slot.life = Math.max(0.01, emitter.life + runtime.rng.centered(emitter.lifeRnd));
 
-  const radius = Math.max(0.01, emitter.shapeRadius || 0.35);
+  const radius = Math.max(0.01, emitter.shapeRadius ?? 0.35);
   let ox = 0, oy = 0, oz = 0;
 
   if (emitter.shape === 'box') {
@@ -67,11 +67,15 @@ export function spawnParticle(runtime: RuntimeEmitter): void {
     oz = r * Math.sin(theta) * Math.sin(phi);
   } else if (emitter.shape === 'ring' || emitter.shape === 'disc' || emitter.shape === 'cone') {
     const angle = runtime.rng.next() * Math.PI * 2;
+    const rndSqrt = Math.sqrt(runtime.rng.next());
     const r = emitter.shape === 'ring' ? radius
-      : emitter.shape === 'cone' ? Math.sqrt(runtime.rng.next()) * radius * 0.7
-      : Math.sqrt(runtime.rng.next()) * radius;
+      : emitter.shape === 'cone' ? rndSqrt * radius * 0.7
+      : rndSqrt * radius;
     ox = r * Math.cos(angle);
     oz = r * Math.sin(angle);
+    if (emitter.shape === 'cone') {
+      oy = -rndSqrt * radius * 0.5;
+    }
   }
 
   slot.boneOx = 0;

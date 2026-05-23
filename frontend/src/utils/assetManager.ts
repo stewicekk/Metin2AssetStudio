@@ -1,6 +1,6 @@
 // frontend/src/utils/assetManager.ts
 import { useAppStore } from '../store/useAppStore';
-import type { Emitter } from '../types';
+import type { BlendType, Emitter, RotType, ShapeType } from '../types';
 import { parseMSEAsync } from './asyncParser';
 import { exportMSE, findChild, readListNumber, readNumberProperty, type MSEBlock } from '../core/mseParser';
 import { toast } from './toast';
@@ -23,6 +23,30 @@ function groupToEmitter(group: MSEBlock, index: number): Partial<Emitter> {
   const destBlend = particleProperty ? readNumberProperty(particleProperty, 'DestBlendType', 2) : 2;
   const rotationType = particleProperty ? readNumberProperty(particleProperty, 'RotationType', 2) : 2;
 
+  const shapeVal = emitterProperty ? readNumberProperty(emitterProperty, 'EmitterShape', 0) : 0;
+  const shapeName: Record<number, string> = { 0: 'point', 1: 'disc', 2: 'box', 3: 'sphere', 4: 'cone' };
+  const emitterRadius = emitterProperty ? readNumberProperty(emitterProperty, 'EmittingRadius', 0.35) : 0.35;
+
+  const colorRList = particleProperty ? findChild(particleProperty, 'List', 'TimeEventColorRed') : undefined;
+  const colorGList = particleProperty ? findChild(particleProperty, 'List', 'TimeEventColorGreen') : undefined;
+  const colorBList = particleProperty ? findChild(particleProperty, 'List', 'TimeEventColorBlue') : undefined;
+  const colorAList = particleProperty ? findChild(particleProperty, 'List', 'TimeEventAlpha') : undefined;
+
+  function listToColorKeys(rList: MSEBlock | undefined, gList: MSEBlock | undefined, bList: MSEBlock | undefined, aList: MSEBlock | undefined): { t: number; r: number; g: number; b: number; a: number }[] {
+    const rowsR = rList?.children.filter((c) => c.type === 'Row' && c.values && c.values.length >= 2) ?? [];
+    const rowsG = gList?.children.filter((c) => c.type === 'Row' && c.values && c.values.length >= 2) ?? [];
+    const rowsB = bList?.children.filter((c) => c.type === 'Row' && c.values && c.values.length >= 2) ?? [];
+    const rowsA = aList?.children.filter((c) => c.type === 'Row' && c.values && c.values.length >= 2) ?? [];
+    const allTimes = new Set<number>();
+    [...rowsR, ...rowsG, ...rowsB, ...rowsA].forEach((r) => { const t = Number(r.values?.[0]); if (Number.isFinite(t)) allTimes.add(t); });
+    if (allTimes.size === 0) return [];
+    const times = [...allTimes].sort((a, b) => a - b);
+    return times.map((t) => {
+      const getVal = (rows: MSEBlock[]) => { const r = rows.find((x) => Math.abs(Number(x.values?.[0]) - t) < 0.0001); return r ? Number(r.values?.[1]) : 1; };
+      return { t, r: getVal(rowsR), g: getVal(rowsG), b: getVal(rowsB), a: getVal(rowsA) };
+    });
+  }
+
   return {
     name: `${group.name}_${index + 1}`,
     maxP: emitterProperty ? readNumberProperty(emitterProperty, 'MaxEmissionCount', 256) : 256,
@@ -30,15 +54,21 @@ function groupToEmitter(group: MSEBlock, index: number): Partial<Emitter> {
     loop: emitterProperty ? (readNumberProperty(emitterProperty, 'CycleLoopEnable', 1) ? 1 : 0) : 1,
     rate: emitterProperty ? readListNumber(emitterProperty, 'TimeEventEmissionCountPerSecond', 60) : 60,
     life: emitterProperty ? readListNumber(emitterProperty, 'TimeEventLifeTime', 1.2) : 1.2,
+    speed: emitterProperty ? readListNumber(emitterProperty, 'TimeEventEmittingVelocity', 0) : 0,
+    gravity: particleProperty ? readListNumber(particleProperty, 'TimeEventGravity', 0) : 0,
+    drag: particleProperty ? readListNumber(particleProperty, 'TimeEventAirResistance', 0) : 0,
     sizeX: emitterProperty ? Math.max(0.05, readListNumber(emitterProperty, 'TimeEventSizeX', 32) / 64) : 1,
     sizeY: emitterProperty ? Math.max(0.05, readListNumber(emitterProperty, 'TimeEventSizeY', 32) / 64) : 1,
-    blend: srcBlend === 5 && destBlend === 2 ? 'add' : srcBlend === 3 && destBlend === 3 ? 'modulate' : 'alpha',
-    rotType: rotationType === 0 ? 'NONE' : rotationType === 2 ? 'SPIN' : 'RANDOM',
+    shapeRadius: emitterRadius,
+    shape: (shapeName[shapeVal] || 'point') as ShapeType,
+    blend: srcBlend === 5 && destBlend === 2 ? 'add' as BlendType : srcBlend === 2 && destBlend === 5 ? 'modulate' as BlendType : 'alpha' as BlendType,
+    rotType: rotationType === 0 ? 'NONE' as RotType : rotationType === 2 ? 'SPIN' as RotType : 'RANDOM' as RotType,
     spin: particleProperty ? readNumberProperty(particleProperty, 'RotationSpeed', 0) : 0,
     texPath: texturePath,
     builtinTex: texturePath ? 'circle' : 'spark',
     alphaCurve: particleProperty ? rowsToCurve(findChild(particleProperty, 'List', 'TimeEventAlpha'), [{ t: 0, v: 1 }, { t: 1, v: 0 }]) : undefined,
     sizeCurve: particleProperty ? rowsToCurve(findChild(particleProperty, 'List', 'TimeEventScaleX'), [{ t: 0, v: 1 }, { t: 1, v: 0.2 }]) : undefined,
+    colorKeys: listToColorKeys(colorRList, colorGList, colorBList, colorAList),
   };
 }
 
@@ -56,11 +86,7 @@ function buildStudioMse(emitters: Emitter[]): string {
 
   function shapeCode(shape: string): number {
     const map: Record<string, number> = {
-      point: 0,
-      ring: 1, disc: 1,
-      box: 2,
-      sphere: 3, spherevol: 3,
-      cone: 4,
+      point: 0, ring: 1, disc: 1, box: 2, sphere: 3, spherevol: 3, cone: 4,
     };
     return map[shape] ?? 0;
   }
@@ -85,90 +111,124 @@ function buildStudioMse(emitters: Emitter[]): string {
     return uvAnim === 'rand' ? 3 : uvAnim === 'once' ? 2 : uvAnim === 'loop' ? 1 : 0;
   }
 
-  let output = 'BoundingSphereRadius   50.000000\nBoundingSpherePosition 0.000000 0.000000 0.000000\n\n';
+  function emitList(name: string, rows: string[], empty = false): void {
+    if (empty || rows.length === 0) {
+      o += `        List ${name}\n        {\n        }\n`;
+      return;
+    }
+    o += `        List ${name}\n        {\n`;
+    rows.forEach((r) => { o += `            ${r}\n`; });
+    o += '        }\n';
+  }
+
+  function emitTimeEventRows(values: { t: number; v: number }[]): string[] {
+    if (!values || values.length === 0) return [];
+    const sorted = [...values].sort((a, b) => a.t - b.t);
+    return sorted.map((p) => `${fmt(p.t)} ${fmt(p.v)}`);
+  }
+
+  function emitColorRows(keys: { t: number; r: number; g: number; b: number; a: number }[], channel: 'r' | 'g' | 'b' | 'a'): string[] {
+    if (!keys || keys.length === 0) return [];
+    const sorted = [...keys].sort((a, b) => a.t - b.t);
+    return sorted.map((k) => `${fmt(k.t)} ${fmt(k[channel])}`);
+  }
+
+  function i(value: number): string {
+    return String(Math.round(value));
+  }
+
+  let o = 'BoundingSphereRadius   50.000000\nBoundingSpherePosition 0.000000 0.000000 0.000000\n';
 
   emitters.forEach((emitter) => {
-    output += 'Group Particle\n{\n';
-    output += `    StartTime           ${fmt(emitter.delay)}\n`;
-    output += '    List TimeEventPosition\n    {\n        0.000000 "MOVING_TYPE_DIRECT" 0.000000 0.000000 0.000000\n    }\n';
-    output += '    \n    Group EmitterProperty\n    {\n';
-    output += `        MaxEmissionCount        ${Math.min(emitter.maxP, 2048)}\n\n`;
-    output += `        CycleLength             ${fmt(emitter.cycle)}\n`;
-    output += `        CycleLoopEnable         ${emitter.loop ? 1 : 0}\n`;
-    output += '        LoopCount               0\n\n';
-    output += `        EmitterShape            ${shapeCode(emitter.shape)}\n`;
-    output += '        EmitterAdvancedType     0\n';
-    output += `        EmitterEmitFromEdgeFlag  ${emitEdgeFlag(emitter.emitSurface)}\n`;
-    output += `        EmittingRadius          ${fmt(emitter.shapeRadius)}\n`;
-    output += `        EmittingSizeX           ${fmt(emitter.shapeRadius)}\n`;
-    output += `        EmittingSizeY           ${fmt(emitter.shapeRadius)}\n`;
-    output += `        EmittingSizeZ           ${fmt(emitter.shapeRadius)}\n`;
-    output += `        EmittingDirection       ${fmt(emitter.dirYaw)} ${fmt(emitter.dirPitch)} 0.000000\n\n`;
-    output += '        List TimeEventEmittingSize\n        {\n            0.000000 0.000000\n        }\n';
-    output += '        List TimeEventEmittingAngularVelocity\n        {\n            0.000000 0.000000\n        }\n';
-    output += '        List TimeEventEmittingDirectionX\n        {\n            0.000000 0.000000\n        }\n';
-    output += '        List TimeEventEmittingDirectionY\n        {\n            0.000000 1.000000\n        }\n';
-    output += '        List TimeEventEmittingDirectionZ\n        {\n            0.000000 0.000000\n        }\n';
-    output += `        List TimeEventEmittingVelocity\n        {\n            0.000000 ${fmt(emitter.speed)}\n        }\n`;
-    output += `        List TimeEventEmissionCountPerSecond\n        {\n            0.000000 ${fmt(emitter.rate)}\n        }\n`;
-    output += `        List TimeEventLifeTime\n        {\n            0.000000 ${fmt(emitter.life)}\n        }\n`;
-    output += `        List TimeEventSizeX\n        {\n            0.000000 ${fmt(emitter.sizeX * 64)}\n        }\n`;
-    output += `        List TimeEventSizeY\n        {\n            0.000000 ${fmt((emitter.sizeNonUniform ? emitter.sizeY : emitter.sizeX) * 64)}\n        }\n`;
-    output += '    }\n    \n    Group ParticleProperty\n    {\n';
-    output += `        SrcBlendType                 ${srcBlendCode(emitter.blend)}\n`;
-    output += `        DestBlendType                ${destBlendCode(emitter.blend)}\n`;
-    output += '        ColorOperationType           4\n';
-    output += '        BillboardType                1\n';
-    output += `        RotationType                 ${rotTypeCode(emitter.rotType)}\n`;
-    output += `        RotationSpeed                ${fmt(emitter.spin)}\n`;
-    output += `        RotationRandomStartingBegin  ${fmt(emitter.initRot)}\n`;
-    output += `        RotationRandomStartingEnd    ${fmt(emitter.initRot + emitter.initRotRnd)}\n\n`;
-    output += '        AttachEnable                 0\n';
-    output += '        StretchEnable                0\n\n';
-    output += `        TexAniType                   ${texAniTypeCode(emitter.uvAnim)}\n`;
-    output += `        TexAniDelay                  ${fmt(1 / Math.max(1, emitter.animFPS))}\n`;
-    output += `        TexAniRandomStartFrameEnable ${emitter.uvAnim === 'rand' ? 1 : 0}\n\n`;
-    output += '        List TimeEventGravity\n        {\n';
-    output += `            0.000000 ${fmt(emitter.gravity)}\n`;
-    output += '        }\n';
-    output += '        List TimeEventAirResistance\n        {\n';
-    output += `            0.000000 ${fmt(emitter.drag)}\n`;
-    output += '        }\n';
+    const sc = shapeCode(emitter.shape);
+    o += '\nGroup Particle\n{\n';
+    o += `    StartTime           ${fmt(emitter.delay)}\n`;
+    o += '    List TimeEventPosition\n    {\n';
+    o += `        0.000000 "MOVING_TYPE_DIRECT" 0.000000 0.000000 0.000000\n`;
+    o += '    }\n';
+    o += '    \n    Group EmitterProperty\n    {\n';
+    o += `        MaxEmissionCount        ${Math.min(emitter.maxP, 2048)}\n`;
+    o += '\n';
+    o += `        CycleLength             ${fmt(emitter.cycle)}\n`;
+    o += `        CycleLoopEnable         ${emitter.loop ? 1 : 0}\n`;
+    o += '        LoopCount               0\n';
+    o += '\n';
+    o += `        EmitterShape            ${sc}\n`;
+    o += '        EmitterAdvancedType     0\n';
+    if (sc === 2) {
+      const r = Math.max(0.01, emitter.shapeRadius ?? 0.35);
+      o += `        EmittingSize            ${fmt(r)} ${fmt(r)} ${fmt(r)}\n`;
+    } else if (sc !== 0) {
+      o += `        EmittingRadius          ${fmt(Math.max(0.01, emitter.shapeRadius ?? 0.35))}\n`;
+    }
+    o += `        EmitterEmitFromEdgeFlag  ${emitEdgeFlag(emitter.emitSurface)}\n`;
+    o += `        EmittingDirection       ${fmt(emitter.dirYaw)} ${fmt(emitter.dirPitch)} 0.000000\n`;
+    o += '\n';
+    emitList('TimeEventEmittingSize', ['0.000000 0.000000']);
+    emitList('TimeEventEmittingAngularVelocity', [`0.000000 ${fmt(emitter.spin)}`]);
+    emitList('TimeEventEmittingDirectionX', ['0.000000 0.000000']);
+    emitList('TimeEventEmittingDirectionY', ['0.000000 0.000000']);
+    emitList('TimeEventEmittingDirectionZ', ['0.000000 0.000000']);
+    emitList('TimeEventEmittingVelocity', [`0.000000 ${fmt(emitter.speed)}`]);
+    emitList('TimeEventEmissionCountPerSecond', [`0.000000 ${fmt(emitter.rate)}`]);
+    emitList('TimeEventLifeTime', [`0.000000 ${fmt(emitter.life)}`]);
+    emitList('TimeEventSizeX', [`0.000000 ${fmt(emitter.sizeX * 64)}`]);
+    emitList('TimeEventSizeY', [`0.000000 ${fmt((emitter.sizeNonUniform ? emitter.sizeY : emitter.sizeX) * 64)}`]);
+    o += '    }\n';
+    o += '    \n    Group ParticleProperty\n    {\n';
+    o += `        SrcBlendType                ${srcBlendCode(emitter.blend)}\n`;
+    o += `        DestBlendType               ${destBlendCode(emitter.blend)}\n`;
+    o += '        ColorOperationType          4\n';
+    o += '        BillboardType               1\n';
+    o += `        RotationType                ${rotTypeCode(emitter.rotType)}\n`;
+    o += `        RotationSpeed               ${fmt(emitter.spin)}\n`;
+    o += `        RotationRandomStartingBegin ${i(emitter.initRot)}\n`;
+    o += `        RotationRandomStartingEnd   ${i(emitter.initRot + emitter.initRotRnd)}\n`;
+    o += '\n';
+    o += '        AttachEnable                0\n';
+    o += '        StretchEnable               0\n';
+    o += '\n';
+    o += `        TexAniType                  ${texAniTypeCode(emitter.uvAnim)}\n`;
+    o += `        TexAniDelay                 ${fmt(1 / Math.max(1, emitter.animFPS))}\n`;
+    o += '        TexAniRandomStartFrameEnable 0\n';
+    o += '\n';
 
-    const sizeCurve = emitter.sizeCurve?.length ? [...emitter.sizeCurve].sort((a, b) => a.t - b.t) : [{ t: 0, v: 1 }, { t: 1, v: 0 }];
-    output += '        List TimeEventScaleX\n        {\n';
-    sizeCurve.forEach((point) => { output += `            ${fmt(point.t)} ${fmt(point.v)}\n`; });
-    output += '        }\n';
-    output += '        List TimeEventScaleY\n        {\n';
-    sizeCurve.forEach((point) => { output += `            ${fmt(point.t)} ${fmt(point.v)}\n`; });
-    output += '        }\n';
+    const gravRows = emitTimeEventRows([{ t: 0, v: emitter.gravity }]);
+    const dragRows = emitTimeEventRows([{ t: 0, v: emitter.drag }]);
+    emitList('TimeEventGravity', gravRows, emitter.gravity === 0);
+    emitList('TimeEventAirResistance', dragRows, emitter.drag === 0);
 
-    const colorKeys = emitter.colorKeys?.length ? [...emitter.colorKeys].sort((a, b) => a.t - b.t) : [{ t: 0, r: 1, g: 1, b: 1, a: 1 }];
-    output += '        List TimeEventColorRed\n        {\n';
-    colorKeys.forEach((k) => { output += `            ${fmt(k.t)} ${fmt(k.r)}\n`; });
-    output += '        }\n';
-    output += '        List TimeEventColorGreen\n        {\n';
-    colorKeys.forEach((k) => { output += `            ${fmt(k.t)} ${fmt(k.g)}\n`; });
-    output += '        }\n';
-    output += '        List TimeEventColorBlue\n        {\n';
-    colorKeys.forEach((k) => { output += `            ${fmt(k.t)} ${fmt(k.b)}\n`; });
-    output += '        }\n';
+    const sizeCurve = emitter.sizeCurve?.length ? [...emitter.sizeCurve].sort((a, b) => a.t - b.t) : null;
+    const sr = sizeCurve ? emitTimeEventRows(sizeCurve) : [];
+    const defaultSR = sizeCurve === null;
+    emitList('TimeEventScaleX', sr, defaultSR);
+    emitList('TimeEventScaleY', sr, defaultSR);
 
-    const alphaCurve = emitter.alphaCurve?.length ? [...emitter.alphaCurve].sort((a, b) => a.t - b.t) : [{ t: 0, v: 1 }, { t: 1, v: 0 }];
-    output += '        List TimeEventAlpha\n        {\n';
-    alphaCurve.forEach((point) => { output += `            ${fmt(point.t)} ${fmt(point.v)}\n`; });
-    output += '        }\n';
+    const colorKeys = emitter.colorKeys?.length ? [...emitter.colorKeys].sort((a, b) => a.t - b.t) : null;
+    if (colorKeys) {
+      emitList('TimeEventColorRed', emitColorRows(colorKeys, 'r'), false);
+      emitList('TimeEventColorGreen', emitColorRows(colorKeys, 'g'), false);
+      emitList('TimeEventColorBlue', emitColorRows(colorKeys, 'b'), false);
+    } else {
+      emitList('TimeEventColorRed', [], true);
+      emitList('TimeEventColorGreen', [], true);
+      emitList('TimeEventColorBlue', [], true);
+    }
 
-    output += '        List TimeEventRotation\n        {\n            0.000000 0.000000\n        }\n';
+    const alphaCurve = emitter.alphaCurve?.length ? [...emitter.alphaCurve].sort((a, b) => a.t - b.t) : null;
+    const ar = alphaCurve ? emitTimeEventRows(alphaCurve) : [];
+    emitList('TimeEventAlpha', ar, alphaCurve === null);
 
-    output += '        List TextureFiles\n        {\n';
-    output += `            "${emitter.texPath || `${emitter.name.toLowerCase()}.dds`}"\n`;
-    output += '        }\n';
-    output += '    }\n}\n';
+    emitList('TimeEventRotation', ['0.000000 0.000000']);
+
+    o += `        List TextureFiles\n        {\n`;
+    o += `            "${emitter.texPath || `${emitter.name.toLowerCase()}.dds`}"\n`;
+    o += `        }\n`;
+    o += '    }\n';
+    o += '}\n';
   });
 
-  output += '\n';
-  return output;
+  return o;
 }
 
 export const AssetManager = {

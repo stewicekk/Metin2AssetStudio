@@ -262,7 +262,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   activeEmitterId: null,
   activeEffectId: null,
   globalTime: 0,
-  playing: false,
+  playing: initialSettings.autoPlay,
   activeCurve: 'size',
   curveInterp: 'linear',
   curveDragIdx: null,
@@ -353,7 +353,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   resetProject: () => {
     get()._pushHistory();
-    set({ emitters: [], importedEffects: [], activeEmitterId: null, activeEffectId: null, globalTime: 0, playing: false, _uidCounter: 1 });
+    set({ emitters: [], importedEffects: [], activeEmitterId: null, activeEffectId: null, globalTime: 0, playing: get().settings.autoPlay, _uidCounter: 1 });
   },
 
   addEmitter: (name) => {
@@ -649,7 +649,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         gizmoMode: (data.scene?.gizmoMode as 'translate' | 'rotate' | 'scale') ?? 'translate',
         activeEmitterId: data.emitters[0]?.uid ?? null,
         globalTime: 0,
-        playing: false,
+  playing: initialSettings.autoPlay,
         _uidCounter: Math.max(0, ...data.emitters.map(e => e.uid)) + 1,
       });
       return true;
