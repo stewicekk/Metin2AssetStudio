@@ -7,6 +7,7 @@ export function TimelinePanel() {
   const { t } = useT();
   const emitters = useAppStore(s => s.emitters);
   const globalTime = useAppStore(s => s.globalTime);
+  const playing = useAppStore(s => s.playing);
   const setPlaying = useAppStore(s => s.setPlaying);
   const setGlobalTime = useAppStore(s => s.setGlobalTime);
   const autoCycle = useAppStore(s => s.autoCycle);
@@ -62,8 +63,8 @@ export function TimelinePanel() {
   return (
     <div className="timeline-panel">
       <div className="timeline-controls">
-        <button className="btn sm" onClick={handlePlay} title={t('tl_play')}>{t('tl_play')}</button>
-        <button className="btn sm" onClick={handlePause} title={t('tl_pause')}>{t('tl_pause')}</button>
+        <button className="btn sm" onClick={handlePlay} title={t('tl_play')} disabled={playing}>{t('tl_play')}</button>
+        <button className="btn sm" onClick={handlePause} title={t('tl_pause')} disabled={!playing}>{t('tl_pause')}</button>
         <button className="btn sm" onClick={handleStop} title={t('tl_stop')}>{t('tl_stop')}</button>
         <button className={'btn sm' + (autoCycle ? ' active' : '')} onClick={handleToggleCycle} title={t('tl_cycle')}>{t('tl_cycle')}</button>
       </div>

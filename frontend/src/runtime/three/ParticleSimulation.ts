@@ -76,6 +76,10 @@ export function spawnParticle(runtime: RuntimeEmitter): void {
     if (emitter.shape === 'cone') {
       oy = -rndSqrt * radius * 0.5;
     }
+  } else {
+    ox = runtime.rng.centered(radius * 0.3);
+    oy = runtime.rng.centered(radius * 0.3);
+    oz = runtime.rng.centered(radius * 0.3);
   }
 
   slot.boneOx = 0;
@@ -132,10 +136,13 @@ export function updateRuntime(runtime: RuntimeEmitter, dt: number, playing: bool
 
       if (emitter.loop || runtime.localTime <= emitter.cycle) {
         const effectiveRate = emitter.rate * lodFactor;
+        if (runtime.spawnAcc < 0.5 && runtime.localTime >= delay) {
+          runtime.spawnAcc = 0.5;
+        }
         runtime.spawnAcc += effectiveRate * dt;
         const count = Math.floor(runtime.spawnAcc);
         runtime.spawnAcc -= count;
-        for (let i = 0; i < Math.min(count, 16); i += 1) spawnParticle(runtime);
+        for (let i = 0; i < Math.min(count, 8); i += 1) spawnParticle(runtime);
       }
     }
   }

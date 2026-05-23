@@ -37,13 +37,10 @@ function App() {
   const setExportModal = useAppStore(s => s.setExportModal);
   const vpScale = useAppStore(s => s.vpScale);
   const setVpScale = useAppStore(s => s.setVpScale);
-  const autoCycle = useAppStore(s => s.autoCycle);
-  const setAutoCycle = useAppStore(s => s.setAutoCycle);
   const cameraControllerRef = useRef<{ reset: () => void; setView: (f: string) => void; screenshot: () => void; fullscreen: () => void } | null>(null);
 
   const initialized = useRef(false);
   const mseInputRef = useRef<HTMLInputElement>(null);
-  const meshInputRef = useRef<HTMLInputElement>(null);
   const loadInputRef = useRef<HTMLInputElement>(null);
   const [activeTab, setActiveTab] = useState<TabId>('props');
   const [projectList, setProjectList] = useState<StoredProject[]>([]);
@@ -56,8 +53,9 @@ function App() {
   useEffect(() => {
     if (initialized.current) return;
     initialized.current = true;
-    addEmitter('FireBall_Main');
-    setPlaying(true);
+    const st = useAppStore.getState();
+    if (st.emitters.length === 0) addEmitter('FireBall_Main');
+    if (!st.playing) setPlaying(true);
   }, [addEmitter, setPlaying]);
 
   useEffect(() => {
@@ -269,33 +267,6 @@ function App() {
     setExportModal({ open: true, title: t('export_validation_title'), content: msg, ext: 'txt' });
   };
 
-  const handleExportMDE = () => {
-    const state = useAppStore.getState();
-    const result = pluginManager.export(state.emitters, 'mde', {
-      effectName: state.exportEffectName,
-      effectPath: state.exportEffectPath,
-      attachBone: state.envBone,
-      precision: state.settings.exportPrec,
-    });
-    if (result) {
-      downloadText(result.data, `${state.exportEffectName}.mde`);
-      toast(t('toast_mde_exported'), 'success');
-    }
-  };
-
-  const handleExportEFF = () => {
-    const state = useAppStore.getState();
-    const result = pluginManager.export(state.emitters, 'eff', {
-      effectName: state.exportEffectName,
-      effectPath: state.exportEffectPath,
-      precision: state.settings.exportPrec,
-    });
-    if (result) {
-      downloadText(result.data, `${state.exportEffectName}.eff`);
-      toast(t('toast_eff_exported'), 'success');
-    }
-  };
-
   const handleCopyExport = useCallback(() => {
     if (exportModal?.content) copyToClipboard(exportModal.content);
   }, [exportModal]);
@@ -386,10 +357,7 @@ function App() {
 
       <main id="center" className="studio-center">
         <div className="viewport-bar">
-          <button className="btn sm" onClick={() => setPlaying(true)} title={t('btn_play')}>{t('btn_play')}</button>
-          <button className="btn sm" onClick={() => setPlaying(false)} title={t('btn_pause')}>{t('btn_pause')}</button>
           <button className="btn sm" onClick={handleStop} title={t('btn_stop')}>{t('btn_stop')}</button>
-          <button className={`btn sm` + (autoCycle ? ' active' : '')} onClick={() => setAutoCycle(!autoCycle)} title={t('btn_autocycle')}>{autoCycle ? t('btn_cycle_on') : t('btn_cycle_off')}</button>
           <button className="btn sm" onClick={handleWarmStart} title={t('btn_fill')}>{t('btn_fill')}</button>
           <span className="sep-v" />
           <button className="btn sm" onClick={() => cameraControllerRef.current?.reset()} title={t('btn_reset_camera')}>{t('btn_reset_camera')}</button>
@@ -398,10 +366,6 @@ function App() {
           <button className="btn sm" onClick={() => cameraControllerRef.current?.setView('persp')} title={t('btn_3d')}>{t('btn_3d')}</button>
           <button className="btn sm" onClick={() => cameraControllerRef.current?.screenshot()} title={t('btn_screenshot')}>{t('btn_screenshot')}</button>
           <button className="btn sm" onClick={() => cameraControllerRef.current?.fullscreen()} title={t('btn_fullscreen')}>{t('btn_fullscreen')}</button>
-          <span className="sep-v" />
-          <button className="btn sm accent" onClick={handleExportMDE} title={t('btn_mde')}>{t('btn_mde')}</button>
-          <button className="btn sm" onClick={handleExportEFF} title={t('btn_eff')}>{t('btn_eff')}</button>
-          <span className="sep-v" />
           <label className="lbl">{t('scene_scale')}:</label>
           <input type="range" min={0.05} max={8} step={0.05} value={vpScale}
             onChange={e => setVpScale(parseFloat(e.target.value))} className="n60" />
@@ -470,7 +434,6 @@ function App() {
           </div>
         </div>
       )}
-      <input type="file" ref={meshInputRef} accept=".obj,.gltf,.glb,.fbx" hidden />
     </div>
   );
 }

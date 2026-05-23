@@ -1,18 +1,9 @@
 import type { Emitter } from '../types';
-import { analyzeExportCompatibility } from './exporterDiagnostics';
-import type { ExportDiagnostic } from './exporterDiagnostics';
 
 export interface ExportOptions {
   precision: number;
   effectName: string;
   effectPath: string;
-}
-
-export interface ExportResult {
-  content: string;
-  diagnostics: ExportDiagnostic[];
-  lines: number;
-  bytes: number;
 }
 
 const defaultOptions: ExportOptions = {
@@ -225,28 +216,6 @@ export function buildMDE(emitters: Emitter[], options: Partial<ExportOptions> & 
   t += `}\n`;
   
   return t;
-}
-
-export function buildMDEWithDiagnostics(
-  emitters: Emitter[],
-  options: Partial<ExportOptions> & { attachBone?: string } = {},
-): ExportResult {
-  const diags = analyzeExportCompatibility(emitters);
-  const content = buildMDE(emitters, options);
-  const lines = content.split(/\r?\n/).length;
-  const bytes = new TextEncoder().encode(content).length;
-  return { content, diagnostics: diags, lines, bytes };
-}
-
-export function buildEFFWithDiagnostics(
-  emitters: Emitter[],
-  options: Partial<ExportOptions> = {},
-): ExportResult {
-  const diags = analyzeExportCompatibility(emitters);
-  const content = buildEFF(emitters, options);
-  const lines = content.split(/\r?\n/).length;
-  const bytes = new TextEncoder().encode(content).length;
-  return { content, diagnostics: diags, lines, bytes };
 }
 
 export function downloadText(content: string, filename: string): void {

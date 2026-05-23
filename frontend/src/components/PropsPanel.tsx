@@ -217,7 +217,7 @@ export function PropsPanel() {
         <PropRow label={t('ee_anim_fps')}>
           <input type="number" value={emitter.animFPS} min={1} max={60} step={1} onChange={(e) => handleNumber('animFPS', e.target.value)} className="n60" />
         </PropRow>
-        <PropRow label={t('ee_texture')}>
+        <PropRow label={t('ee_tex_path')}>
           <input type="text" value={emitter.texPath} placeholder="effect/skill/fire.tga" onChange={(e) => handleChange('texPath', e.target.value)} className="flex1" />
         </PropRow>
       </Section>

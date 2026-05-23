@@ -2,7 +2,7 @@ import { useAppStore } from '../store/useAppStore';
 import { useT } from '../i18n';
 
 export function SceneSettings() {
-  const { t, locale, setLocale } = useT();
+  const { t, locale } = useT();
   const settings = useAppStore(s => s.settings);
   const setSettings = useAppStore(s => s.setSettings);
   const sceneBg = useAppStore(s => s.sceneBg);
@@ -38,7 +38,6 @@ export function SceneSettings() {
 
   const applyTheme = (theme: string) => {
     setSettings({ theme });
-    document.documentElement.setAttribute('data-theme', theme);
   };
 
   const themeNames: Record<string, string> = {
@@ -56,8 +55,6 @@ export function SceneSettings() {
     emerald: 'linear-gradient(135deg, #020a05 40%, #30c060 100%)',
     light: 'linear-gradient(135deg, #f0f4f8 40%, #8060a0 100%)',
   };
-
-  if (settings.theme == null) return null;
 
   return (
     <div className="scene-settings">
@@ -178,9 +175,9 @@ export function SceneSettings() {
         <div className="sec-body open">
           <div className="scene-lang">
             <div className={'cqbtn' + (locale === 'en' ? ' active' : '')}
-              onClick={() => { setLocale('en'); setSettings({ language: 'en' }); }}>{t('scene_lang_en')}</div>
+              onClick={() => setSettings({ language: 'en' })}>{t('scene_lang_en')}</div>
             <div className={'cqbtn' + (locale === 'cs' ? ' active' : '')}
-              onClick={() => { setLocale('cs'); setSettings({ language: 'cs' }); }}>{t('scene_lang_cs')}</div>
+              onClick={() => setSettings({ language: 'cs' })}>{t('scene_lang_cs')}</div>
           </div>
         </div>
       </div>

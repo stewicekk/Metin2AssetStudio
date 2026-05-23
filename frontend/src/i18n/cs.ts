@@ -50,6 +50,7 @@ export const cs: Dict = {
   vp_effects: 'Efekty',
   vp_emitters: 'emitorů',
   vp_orbit: 'RMB rotace · MMB posun · Kolečko zoom',
+  vp_no_particles: 'Žádné částice — přidej emitor nebo importuj .mse',
 
   scene_bg: 'Pozadí',
   scene_grid: 'Mřížka',
@@ -140,6 +141,7 @@ export const cs: Dict = {
   ee_init_rot_rnd: 'Poč. rot Rnd',
   ee_vel_stretch: 'Protahování',
   ee_texture: 'Textura',
+  ee_tex_path: 'Vlastní cesta',
   ee_sheet_cols: 'Sloupce',
   ee_sheet_rows: 'Řádky',
   ee_uv_anim: 'UV Anim',

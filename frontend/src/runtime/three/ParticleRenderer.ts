@@ -280,6 +280,7 @@ export class ParticleRenderer {
     }
 
     const points = new THREE.Points(geometry, material);
+    points.frustumCulled = false;
     points.visible = emitter.visible;
     this.scene.add(points);
 

@@ -182,28 +182,4 @@ export function analyzeExportCompatibility(emitters: Emitter[]): ExportDiagnosti
   return diags;
 }
 
-export function formatDiagnostics(diags: ExportDiagnostic[]): string {
-  if (diags.length === 0) return 'No issues found.';
 
-  const lines: string[] = [];
-  const severityOrder = { error: 0, warn: 1, info: 2 };
-
-  const sorted = [...diags].sort((a, b) => {
-    const sa = severityOrder[a.severity];
-    const sb = severityOrder[b.severity];
-    if (sa !== sb) return sa - sb;
-    return a.emitterName.localeCompare(b.emitterName);
-  });
-
-  const counts = { error: 0, warn: 0, info: 0 };
-  for (const d of diags) counts[d.severity]++;
-
-  lines.push(`Export analysis: ${counts.error} errors, ${counts.warn} warnings, ${counts.info} notes\n`);
-
-  for (const d of sorted) {
-    const tag = d.severity === 'error' ? '✗' : d.severity === 'warn' ? '!' : 'i';
-    lines.push(`  [${tag}] ${d.emitterName}: ${d.message}`);
-  }
-
-  return lines.join('\n');
-}

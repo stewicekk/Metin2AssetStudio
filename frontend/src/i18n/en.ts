@@ -50,6 +50,7 @@ export const en: Dict = {
   vp_effects: 'Effects',
   vp_emitters: 'emitters',
   vp_orbit: 'RMB orbit · MMB pan · Scroll zoom',
+  vp_no_particles: 'No particles — add an emitter or import .mse',
 
   scene_bg: 'Background',
   scene_grid: 'Grid',
@@ -140,6 +141,7 @@ export const en: Dict = {
   ee_init_rot_rnd: 'Init Rot Rnd',
   ee_vel_stretch: 'Vel Stretch',
   ee_texture: 'Texture',
+  ee_tex_path: 'Custom path',
   ee_sheet_cols: 'Cols',
   ee_sheet_rows: 'Rows',
   ee_uv_anim: 'UV Anim',

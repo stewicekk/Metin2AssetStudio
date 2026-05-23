@@ -21,6 +21,8 @@ export const Viewport = forwardRef(function Viewport(
   const infoRef = useRef<HTMLDivElement>(null);
   const perfRef = useRef<HTMLDivElement>(null);
   const hostRef = useRef<RendererHost | null>(null);
+  const cameraRefRef = useRef(cameraRef);
+  cameraRefRef.current = cameraRef;
 
   useImperativeHandle(ref, () => ({
     reset: () => hostRef.current?.resetCamera(),
@@ -37,7 +39,7 @@ export const Viewport = forwardRef(function Viewport(
       perf: perfRef.current,
     });
     hostRef.current = host;
-    cameraRef?.({
+    cameraRefRef.current?.({
       reset: () => host.resetCamera(),
       setView: (f: string) => host.setCameraView(f as 'front' | 'top' | 'persp'),
       screenshot: () => host.requestScreenshot(),
@@ -46,9 +48,9 @@ export const Viewport = forwardRef(function Viewport(
     return () => {
       host.dispose();
       hostRef.current = null;
-      cameraRef?.(null);
+      cameraRefRef.current?.(null);
     };
-  }, [cameraRef]);
+  }, []);
 
   const emitters = useAppStore(s => s.emitters);
   const minimapDots = useMemo(() => emitters.map(e => ({
@@ -66,6 +68,7 @@ export const Viewport = forwardRef(function Viewport(
         <div id="axis-lbl">{t('vp_title')}</div>
         <div id="vp-info" ref={infoRef}></div>
         <div id="vp-perf-badge" ref={perfRef}></div>
+        {emitters.length === 0 && <div id="vp-empty-msg">{t('vp_no_particles')}</div>}
       </div>
       <Minimap emitters={minimapDots} />
     </div>

@@ -54,6 +54,7 @@ export interface Dict {
   vp_effects: string;
   vp_emitters: string;
   vp_orbit: string;
+  vp_no_particles: string;
 
   // Scene
   scene_bg: string;
@@ -146,6 +147,7 @@ export interface Dict {
   ee_init_rot_rnd: string;
   ee_vel_stretch: string;
   ee_texture: string;
+  ee_tex_path: string;
   ee_sheet_cols: string;
   ee_sheet_rows: string;
   ee_uv_anim: string;
