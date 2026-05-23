@@ -10,8 +10,8 @@ const defaultOptions: MSEExportOptions = {
   effectName: 'MyEffect',
 };
 
-function fmt(value: number, precision: number): string {
-  return value.toFixed(precision);
+function fmt(value: number, _precision: number = 6): string {
+  return value.toFixed(6);
 }
 
 function shapeCode(shape: string): string {
@@ -72,7 +72,7 @@ export function buildMSE(emitters: Emitter[], options: Partial<MSEExportOptions>
     t += `\tRotSpeedMin\t${fmt(e.spin - Math.abs(e.spinRnd), precision)}\n`;
     t += `\tRotSpeedMax\t${fmt(e.spin + Math.abs(e.spinRnd), precision)}\n`;
     
-    t += `\tBlendType\t${e.blend === 'add' ? 'ADD' : e.blend === 'modulate' ? 'MODULATE' : 'NORMAL'}\n`;
+    t += `\tBlendType\t${e.blend === 'add' ? 1 : e.blend === 'modulate' ? 2 : 0}\n`;
     
     const texPath = e.texPath || (effectName.toLowerCase() + '_' + e.name.toLowerCase() + '.tga');
     t += `\tTextureFileName\t"${texPath}"\n`;
