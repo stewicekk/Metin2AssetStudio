@@ -65,15 +65,15 @@ export function PresetsPanel() {
   const [search, setSearch] = useState('');
   const activeEmitterId = useAppStore(s => s.activeEmitterId);
   const applyPreset = useAppStore(s => s.applyPreset);
-  const addEmitter = useAppStore(s => s.addEmitter);
+  const addEmitterFromTemplate = useAppStore(s => s.addEmitterFromTemplate);
 
   const handleApply = useCallback((preset: PresetEntry) => {
     if (activeEmitterId) {
       applyPreset(activeEmitterId, { e: preset.e });
     } else {
-      addEmitter(preset.n);
+      addEmitterFromTemplate(preset.n, preset.e);
     }
-  }, [activeEmitterId, applyPreset, addEmitter]);
+  }, [activeEmitterId, applyPreset, addEmitterFromTemplate]);
 
   const filtered = search
     ? PRESETS.filter(p => p.n.toLowerCase().includes(search.toLowerCase()) || p.cat.toLowerCase().includes(search.toLowerCase()))

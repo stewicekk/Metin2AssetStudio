@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useT } from '../i18n';
+import type { Dict } from '../i18n/types';
 import { pluginManager } from '../plugins';
 import type { Plugin } from '../plugins/types';
 import { isExportPlugin, isTransformPlugin, isImportPlugin } from '../plugins/types';
@@ -11,8 +12,7 @@ function pluginTypeClass(p: Plugin): string {
   return '';
 }
 
-function pluginTypeLabel(p: Plugin): string {
-  const { t } = useT();
+function pluginTypeLabel(p: Plugin, t: (k: keyof Dict) => string): string {
   if (isExportPlugin(p)) return t('pp_type_export');
   if (isTransformPlugin(p)) return t('pp_type_transform');
   if (isImportPlugin(p)) return t('pp_type_import');
@@ -63,7 +63,7 @@ export function PluginStatusPanel() {
               <span className="plugin-version">{p.version}</span>
             </div>
             <div className="plugin-meta">
-              <span className={'plugin-type-badge ' + pluginTypeClass(p)}>{pluginTypeLabel(p)}</span>
+              <span className={'plugin-type-badge ' + pluginTypeClass(p)}>{pluginTypeLabel(p, t)}</span>
               <span className="plugin-id">{p.id}</span>
             </div>
             {'extensions' in p && p.extensions && (

@@ -94,7 +94,8 @@ export function spawnParticle(runtime: RuntimeEmitter): void {
   const direction = vec3Pool.acquire();
   direction.set(Math.cos(pitch) * Math.sin(yaw), Math.sin(pitch), Math.cos(pitch) * Math.cos(yaw)).normalize();
   const axis = vec3Pool.acquire();
-  axis.set(runtime.rng.centered(), runtime.rng.centered(), runtime.rng.centered()).normalize();
+  axis.set(runtime.rng.centered(), runtime.rng.centered(), runtime.rng.centered());
+  if (axis.lengthSq() > 0.0001) axis.normalize(); else axis.set(0, 1, 0);
   direction.applyAxisAngle(axis, runtime.rng.centered(THREE.MathUtils.degToRad(emitter.spread) * 0.5));
   const speed = Math.max(0, emitter.speed + runtime.rng.centered(emitter.speedRnd));
   slot.vx = direction.x * speed;
@@ -130,7 +131,7 @@ export function updateRuntime(runtime: RuntimeEmitter, dt: number, playing: bool
 
     const delay = emitter.delay || 0;
     if (runtime.localTime >= delay) {
-      if (emitter.burst > 0 && runtime.localTime - dt < delay + dt && runtime.localTime >= delay) {
+      if (emitter.burst > 0 && runtime.localTime - dt < delay && runtime.localTime >= delay) {
         for (let i = 0; i < emitter.burst; i += 1) spawnParticle(runtime);
       }
 

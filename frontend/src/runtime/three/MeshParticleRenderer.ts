@@ -140,11 +140,13 @@ function createMeshRuntime(emitter: Emitter, textures: TextureRegistry, shaderCa
     return new THREE.ShaderMaterial({
       transparent: true,
       depthWrite: false,
-      blending: emitter.blend === 'add'
-        ? THREE.AdditiveBlending
-        : emitter.blend === 'modulate'
-          ? THREE.MultiplyBlending
-          : THREE.NormalBlending,
+        blending: emitter.blend === 'add'
+          ? THREE.AdditiveBlending
+          : emitter.blend === 'modulate'
+            ? THREE.CustomBlending
+            : THREE.NormalBlending,
+        blendSrc: emitter.blend === 'modulate' ? THREE.ZeroFactor : THREE.SrcAlphaFactor,
+        blendDst: emitter.blend === 'modulate' ? THREE.SrcColorFactor : THREE.OneMinusSrcAlphaFactor,
       vertexColors: false,
       uniforms: {
         uTex: { value: textures.resolveTexture(emitter) },
@@ -312,8 +314,6 @@ export class MeshParticleRenderer {
 
     const uniqueTexKeys = new Set(meshEmitters.map(e => e.texDataUrl || e.builtinTex || 'circle'));
     const useAtlas = uniqueTexKeys.size > 1;
-
-    if (useAtlas) this.textures.buildAtlas(meshEmitters);
 
     this.runtimes.forEach((_rt, uid) => {
       if (!activeIds.has(uid)) {

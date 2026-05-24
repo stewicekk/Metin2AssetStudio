@@ -113,16 +113,16 @@ export class ParticleRenderer {
   }
 
   sync(emitters: Emitter[]): void {
-    const pointEmitters = emitters.filter(e => !MeshParticleRenderer.needsMeshMode(e));
-    const activeIds = new Set(pointEmitters.map((emitter) => emitter.uid));
-    this.meshRenderer.sync(emitters);
-
     const uniqueTexKeys = new Set(emitters.map(e => e.texDataUrl || e.builtinTex || 'circle'));
     const useAtlas = uniqueTexKeys.size > 1;
 
     if (useAtlas) {
       this.textures.buildAtlas(emitters);
     }
+
+    this.meshRenderer.sync(emitters);
+    const pointEmitters = emitters.filter(e => !MeshParticleRenderer.needsMeshMode(e));
+    const activeIds = new Set(pointEmitters.map((emitter) => emitter.uid));
 
     this.runtimes.forEach((_runtime, uid) => {
       if (!activeIds.has(uid)) this.disposeRuntime(uid);
@@ -241,8 +241,10 @@ export class ParticleRenderer {
         blending: emitter.blend === 'add'
           ? THREE.AdditiveBlending
           : emitter.blend === 'modulate'
-            ? THREE.MultiplyBlending
+            ? THREE.CustomBlending
             : THREE.NormalBlending,
+        blendSrc: emitter.blend === 'modulate' ? THREE.ZeroFactor : THREE.SrcAlphaFactor,
+        blendDst: emitter.blend === 'modulate' ? THREE.SrcColorFactor : THREE.OneMinusSrcAlphaFactor,
         vertexColors: true,
         uniforms: {
           uTex: { value: this.textures.resolveTexture(emitter) },

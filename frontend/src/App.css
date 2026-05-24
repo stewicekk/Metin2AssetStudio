@@ -29,19 +29,6 @@
   padding: 4px;
 }
 
-.prop-row {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  color: var(--text2);
-  font-size: 9px;
-}
-
-.prop-row input,
-.prop-row select {
-  min-height: 24px;
-}
-
 .prop-wide {
   flex-direction: column;
   align-items: stretch;
@@ -65,14 +52,6 @@
   margin-bottom: 4px;
 }
 
-.timeline-track {
-  display: grid;
-  grid-template-columns: 92px 1fr;
-  gap: 8px;
-  align-items: center;
-  margin-top: 5px;
-}
-
 .timeline-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   width: 12px;
@@ -80,11 +59,6 @@
   border-radius: 50%;
   background: var(--acc);
   cursor: pointer;
-}
-
-.validation-row--warn {
-  color: var(--orange);
-  background: rgba(224,112,48,.08);
 }
 
 .dependency-row span {

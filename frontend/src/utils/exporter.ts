@@ -229,5 +229,13 @@ export function downloadText(content: string, filename: string): void {
 }
 
 export function copyToClipboard(content: string): void {
-  navigator.clipboard.writeText(content);
+  navigator.clipboard.writeText(content).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = content;
+    ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  });
 }

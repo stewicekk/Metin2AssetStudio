@@ -179,11 +179,13 @@ function App() {
   const handleStop = () => {
     setPlaying(false);
     setGlobalTime(0);
-    emitters.forEach(em => { em._localTime = 0; em._spawnAcc = 0; });
+    const st = useAppStore.getState();
+    st.emitters.forEach(em => st.updateEmitter(em.uid, { _localTime: 0, _spawnAcc: 0 }));
   };
 
   const handleWarmStart = () => {
-    emitters.forEach(em => { em._localTime = 0; em._spawnAcc = em.maxP; });
+    const st = useAppStore.getState();
+    st.emitters.forEach(em => st.updateEmitter(em.uid, { _localTime: 0, _spawnAcc: em.maxP }));
   };
 
   const handleSaveProject = () => {

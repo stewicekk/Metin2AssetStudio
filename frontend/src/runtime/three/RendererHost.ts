@@ -54,6 +54,7 @@ export class RendererHost {
   private bloomComposer: EffectComposer | null = null;
   private bloomPass: UnrealBloomPass | null = null;
   private screenshotRequested = false;
+  private readonly gizmoTargetVec = new THREE.Vector3();
 
   constructor(mount: HTMLElement, overlay: { fps: HTMLElement | null; info: HTMLElement | null; perf: HTMLElement | null }) {
     this.mount = mount;
@@ -262,7 +263,8 @@ export class RendererHost {
     if (state.playing) state.setGlobalTime(state.globalTime + dt);
 
     if (state.gizmoEnabled && this.gizmo) {
-      this.gizmo.setTarget(new THREE.Vector3(state.gizmoTarget.x, state.gizmoTarget.y, state.gizmoTarget.z));
+      this.gizmoTargetVec.set(state.gizmoTarget.x, state.gizmoTarget.y, state.gizmoTarget.z);
+      this.gizmo.setTarget(this.gizmoTargetVec);
       this.gizmo.setMode(state.gizmoMode);
       this.gizmo.update();
     }

@@ -11,7 +11,8 @@ export function sampleCurve(arr: CurvePoint[], t: number, interpolation: CurveIn
 
   for (let i = 0; i < sorted.length - 1; i++) {
     if (t >= sorted[i].t && t <= sorted[i + 1].t) {
-      const tt = (t - sorted[i].t) / (sorted[i + 1].t - sorted[i].t);
+      const dt = sorted[i + 1].t - sorted[i].t;
+      const tt = dt > 0.000001 ? (t - sorted[i].t) / dt : 0.5;
       if (interpolation === 'smooth') {
         const ss = tt * tt * (3 - 2 * tt);
         return lerp(sorted[i].v, sorted[i + 1].v, ss);
@@ -30,7 +31,8 @@ export function sampleColor(keys: ColorKey[], t: number): { r: number; g: number
 
   for (let i = 0; i < sorted.length - 1; i++) {
     if (t >= sorted[i].t && t <= sorted[i + 1].t) {
-      const tt = (t - sorted[i].t) / (sorted[i + 1].t - sorted[i].t);
+      const dt = sorted[i + 1].t - sorted[i].t;
+      const tt = dt > 0.000001 ? (t - sorted[i].t) / dt : 0.5;
       return {
         r: lerp(sorted[i].r, sorted[i + 1].r, tt),
         g: lerp(sorted[i].g, sorted[i + 1].g, tt),
